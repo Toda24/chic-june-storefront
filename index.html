@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHIC JUNE | Luxury Jewelry & Accessories</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts for Luxury Aesthetic -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Paystack Inline JS (Ready for Live Payments) -->
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+
+  <!-- HEADER / BRANDING -->
+  <header>
+    <div class="brand-badge">CJ</div>
+    <h1>CHIC JUNE</h1>
+    <p class="tagline">Clothing & Luxury Jewelry Brand ✨</p>
+    
+    <div class="action-bar">
+      <button class="btn-secondary" onclick="openCareModal()">♡ Jewelry Care Guide</button>
+      <button class="cart-icon-btn" onclick="openCartModal()">
+        🛍️ Cart (<span id="cartBadge">0</span>)
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CATALOG -->
+  <main>
+    <div class="catalog-header">
+      <h2 class="section-title">New Collection</h2>
+      <span class="refresh-status" id="refreshStatus">Updated Live</span>
+    </div>
+    
+    <div class="grid" id="productGrid">
+      <!-- Dynamic Products Inserted by app.js -->
+    </div>
+  </main>
+
+  <!-- CART & CHECKOUT MODAL -->
+  <div class="modal-overlay" id="cartModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Your Order Summary</h3>
+        <button class="close-btn" onclick="closeCartModal()">&times;</button>
+      </div>
+
+      <div id="cartItems" class="cart-items-list"></div>
+      
+      <div class="cart-summary-total">
+        Total: <span>₦<span id="cartTotal">0</span></span>
+      </div>
+
+      <form id="checkoutForm">
+        <h4 class="form-section-heading">Delivery Details</h4>
+        <div class="form-group">
+          <label for="custName">Full Name</label>
+          <input type="text" id="custName" required placeholder="e.g. Blessing Adebayo">
+        </div>
+        <div class="form-group">
+          <label for="custPhone">WhatsApp / Phone Number</label>
+          <input type="tel" id="custPhone" required placeholder="08012345678">
+        </div>
+        <div class="form-group">
+          <label for="custAddress">Delivery Address (Lagos)</label>
+          <textarea id="custAddress" rows="2" required placeholder="House No, Street Name, Area"></textarea>
+        </div>
+        <button type="submit" class="btn-submit" id="submitOrderBtn">Confirm Order & Pay</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JEWELRY CARE MODAL -->
+  <div class="modal-overlay" id="careModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="color: #5C0A1B; font-family: 'Playfair Display', serif;">A Little Love for Your Jewels ♡</h3>
+        <button class="close-btn" onclick="closeCareModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.8rem;">Keep your pieces beautiful with a little extra care:</p>
+      <ul class="care-list">
+        <li>✨ Avoid direct contact with water, perfume & harsh chemicals.</li>
+        <li>✨ Store in a cool, dry place when not in use.</li>
+        <li>✨ Wipe gently with a soft microfibre cloth after every wear.</li>
+        <li>✨ Keep pieces separately to avoid scratches.</li>
+      </ul>
+      <p style="margin-top: 1.2rem; text-align: center; font-size: 0.85rem; font-style: italic; color: #5C0A1B;">
+        Thank you for shopping Chic June. Wear your sparkle with love! ✨
+      </p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
