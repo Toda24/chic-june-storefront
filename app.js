@@ -2,9 +2,9 @@
  * CHIC JUNE - SPA Motion Engine & Automation Endpoint
  */
 
-// 1. PRODUCTION ENDPOINTS
-const N8N_ORDER_WEBHOOK_URL = 'http://localhost:5678/webhook/chic-june-order';
-const N8N_PRODUCTS_URL = 'http://localhost:5678/webhook/chic-june-products';
+// 1. PRODUCTION ENDPOINTS (Live ngrok Tunnel)
+const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
+const N8N_PRODUCTS_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-products';
 
 let products = [
   { 
@@ -46,6 +46,7 @@ let cart = [];
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLiveProducts();
   initSlideshow();
+  initScrollAnimations();
 });
 
 async function fetchLiveProducts() {
@@ -67,6 +68,7 @@ async function fetchLiveProducts() {
   }
 }
 
+// SPA TAB SWITCHER
 function switchTab(tabName) {
   document.querySelectorAll('.page-view').forEach(view => {
     view.classList.remove('active');
@@ -87,8 +89,14 @@ function switchTab(tabName) {
   if (activeBtn) activeBtn.classList.add('active');
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Re-trigger reveal observer when switching to care guide
+  if (tabName === 'care') {
+    setTimeout(initScrollAnimations, 100);
+  }
 }
 
+// HERO SLIDESHOW
 function initSlideshow() {
   const slides = document.querySelectorAll('.slideshow .slide');
   let current = 0;
@@ -101,8 +109,24 @@ function initSlideshow() {
   }, 4500);
 }
 
+// SCROLL ANIMATION OBSERVER (Fades in items smoothly as you scroll)
+function initScrollAnimations() {
+  const reveals = document.querySelectorAll('.reveal-stagger');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('active');
+        }, index * 150); // Stagger effect
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+}
+
+// RENDER PRODUCTS
 function renderGrids() {
-  const homeGrid = document.getElementById('homeProductGrid');
   const fullGrid = document.getElementById('fullProductGrid');
 
   const cardHTML = (p) => `
@@ -123,7 +147,6 @@ function renderGrids() {
     </div>
   `;
 
-  if (homeGrid) homeGrid.innerHTML = products.slice(0, 4).map(cardHTML).join('');
   if (fullGrid) fullGrid.innerHTML = products.map(cardHTML).join('');
 }
 
@@ -183,7 +206,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
   e.preventDefault();
   
   if (cart.length === 0) {
-    alert('Please add at least one item to your cart!');
+    alert('Please add at least one item to your bag!');
     return;
   }
 
