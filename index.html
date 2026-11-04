@@ -20,13 +20,10 @@
   <!-- NAVIGATION HEADER -->
   <header class="navbar">
     <div class="nav-container">
-      <!-- DYNAMIC ANIMATED LOGO MATCHING HER IG BRAND -->
+      <!-- HER EXACT LOGO IMAGE INTEGRATED -->
       <a href="#" class="brand-logo" onclick="switchTab('home')">
-        <div class="logo-assembly-box">
-          <svg class="logo-svg" viewBox="0 0 100 100">
-            <circle class="logo-circle" cx="50" cy="50" r="45" />
-            <text class="logo-monogram" x="50%" y="60%" text-anchor="middle">CJ</text>
-          </svg>
+        <div class="logo-img-wrapper">
+          <img src="logo.jpg" alt="Chic June Crest Logo" class="brand-crest-img">
         </div>
         <div class="brand-name-group">
           <span class="logo-text">CHIC JUNE</span>
@@ -34,7 +31,7 @@
         </div>
       </a>
 
-      <!-- SPA TABS -->
+      <!-- NAVIGATION TABS -->
       <nav class="nav-links">
         <button class="nav-tab active" onclick="switchTab('home')">Home</button>
         <button class="nav-tab" onclick="switchTab('catalog')">New Collection</button>
@@ -43,7 +40,7 @@
 
       <button class="cart-btn" onclick="openCartModal()">
         <span class="cart-icon">🛍️</span>
-        <span class="cart-text">Cart</span>
+        <span class="cart-text">Bag</span>
         <span class="cart-badge" id="cartBadge">0</span>
       </button>
     </div>
@@ -51,7 +48,7 @@
 
   <main class="main-content">
 
-    <!-- PAGE 1: HOME & HERO SLIDESHOW -->
+    <!-- PAGE 1: HOME -->
     <section id="page-home" class="page-view active">
       <div class="hero-slideshow-container">
         <div class="slideshow">
@@ -62,17 +59,27 @@
         <div class="hero-overlay"></div>
         
         <div class="hero-text-content">
-          <p class="hero-badge reveal-item">EST. LUXURY SELECTION</p>
-          <h1 class="hero-title reveal-item">Crowning Your Unique Elegance</h1>
-          <p class="hero-subtitle reveal-item">Bespoke jewelry crafted for royalty. Explore our dynamic new arrivals.</p>
-          <div class="hero-btn-group reveal-item">
+          <div class="hero-logo-center">
+            <img src="logo.jpg" alt="Chic June Luxury Logo" class="hero-crest-img">
+          </div>
+          <h1 class="hero-title motion-slide-up">Crowning Your Unique Elegance</h1>
+          <p class="hero-subtitle motion-fade-delayed">A little dream, a lot of love, and finally... Chic June[cite: 7]. Created for the girl who loves to look effortlessly chic[cite: 7].</p>
+          <div class="hero-btn-group motion-bounce">
             <button class="btn-primary" onclick="switchTab('catalog')">Shop New Collection</button>
             <button class="btn-secondary" onclick="switchTab('care')">Care Guide ♡</button>
           </div>
         </div>
       </div>
 
-      <!-- FEATURED GRID ON HOME PAGE -->
+      <!-- BRAND STORY BANNER -->
+      <section class="story-banner">
+        <div class="story-content">
+          <span class="story-tag">THE CHIC JUNE ETHOS</span>
+          <h2>"A little dream, a lot of love, and finally... Chic June."[cite: 7]</h2>
+          <p>Created for the girl who loves to look effortlessly chic, feel confident, and stand out without trying too hard[cite: 7].</p>
+        </div>
+      </section>
+
       <section class="section-wrapper">
         <div class="section-title-box">
           <p class="section-tag">CURATED PIECES</p>
@@ -83,24 +90,25 @@
       </section>
     </section>
 
-    <!-- PAGE 2: FULL CATALOG / NEW COLLECTION -->
+    <!-- PAGE 2: NEW COLLECTION / CATALOG -->
     <section id="page-catalog" class="page-view">
       <section class="section-wrapper">
         <div class="section-title-box">
           <p class="section-tag">HER MAJESTY'S CATALOG</p>
-          <h2 class="section-title">The Complete Collection</h2>
+          <h2 class="section-title">The New Collection</h2>
           <div class="title-line"></div>
+          <p class="section-desc">Handcrafted gold pieces and video reels straight from Valerie's studio.</p>
         </div>
         <div class="product-grid" id="fullProductGrid"></div>
       </section>
     </section>
 
-    <!-- PAGE 3: JEWELRY CARE GUIDE (MATCHING VALERIE'S IG POST) -->
+    <!-- PAGE 3: JEWELRY CARE GUIDE -->
     <section id="page-care" class="page-view">
       <section class="section-wrapper care-page-wrapper">
         <div class="care-card-luxury">
           <div class="care-card-header">
-            <p class="care-brand-tag">CHIC JUNE</p>
+            <img src="logo.jpg" alt="Chic June Crest" class="care-logo-img">
             <h2 class="care-main-heading">A LITTLE LOVE FOR YOUR JEWELS ♡</h2>
             <p class="care-intro">Keep your pieces beautiful with a little extra care.</p>
           </div>
