@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- PAYSTACK INLINE SDK -->
   <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
@@ -37,17 +38,22 @@
         <button class="nav-tab" onclick="switchTab('care')">Jewelry Care Guide</button>
       </nav>
 
-      <button class="cart-btn" onclick="openCartModal()">
-        <span class="cart-icon">🛍️</span>
-        <span class="cart-text">Bag</span>
-        <span class="cart-badge" id="cartBadge">0</span>
-      </button>
+      <div class="nav-actions">
+        <button class="account-btn" onclick="openAccountModal()">
+          <span id="accountBtnText">👤 Login</span>
+        </button>
+        <button class="cart-btn" onclick="openCartModal()">
+          <span class="cart-icon">🛍️</span>
+          <span class="cart-text">Bag</span>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="main-content">
 
-    <!-- PAGE 1: HOME (EDITORIAL BRAND STORY) -->
+    <!-- PAGE 1: HOME -->
     <section id="page-home" class="page-view active">
       <div class="hero-slideshow-container">
         <div class="slideshow">
@@ -70,7 +76,6 @@
         </div>
       </div>
 
-      <!-- BRAND STORY ETHOS BANNER -->
       <section class="story-banner">
         <div class="story-content">
           <span class="story-tag">THE CHIC JUNE ETHOS</span>
@@ -133,6 +138,11 @@
 
   </main>
 
+  <!-- FLOATING WHATSAPP CHAT WIDGET -->
+  <a href="https://wa.me/2348000000000?text=Hi%20Valerie,%20I'm%20shopping%20on%20Chic%20June%20and%20have%20a%20question!" target="_blank" class="whatsapp-float" title="Chat with Valerie on WhatsApp">
+    <span class="wa-icon">💬</span>
+  </a>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
@@ -152,32 +162,172 @@
     </div>
   </footer>
 
-  <!-- CART & CHECKOUT MODAL -->
+  <!-- CART & PROFESSIONAL CHECKOUT MODAL (ISTUNBYVICK STYLE) -->
   <div class="modal-overlay" id="cartModal">
-    <div class="modal-content">
+    <div class="modal-content checkout-modal-box">
       <div class="modal-header">
-        <h3>Your Shopping Bag</h3>
+        <h3>Secure Checkout</h3>
         <button class="close-btn" onclick="closeCartModal()">&times;</button>
       </div>
-      <div id="cartItemsList" class="cart-items-box"></div>
-      <div class="cart-total-row">
-        <span>Total Amount:</span>
-        <span class="total-price-val">₦<span id="cartTotal">0</span></span>
+      
+      <div class="checkout-layout">
+        <!-- LEFT: CUSTOMER & DELIVERY DETAILS -->
+        <div class="checkout-form-side">
+          <form id="checkoutForm">
+            <h4 class="checkout-section-title">1. Customer & Delivery Details</h4>
+            
+            <div class="form-row-dual">
+              <div class="form-group">
+                <label>First Name *</label>
+                <input type="text" id="custFirstName" required placeholder="Blessing">
+              </div>
+              <div class="form-group">
+                <label>Last Name *</label>
+                <input type="text" id="custLastName" required placeholder="Adeleke">
+              </div>
+            </div>
+
+            <div class="form-row-dual">
+              <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" id="custEmail" required placeholder="blessing@gmail.com">
+              </div>
+              <div class="form-group">
+                <label>WhatsApp Phone *</label>
+                <input type="tel" id="custPhone" required placeholder="08012345678">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Shipping Address *</label>
+              <input type="text" id="custAddress" required placeholder="House number, Street name">
+            </div>
+
+            <div class="form-row-triple">
+              <div class="form-group">
+                <label>Country</label>
+                <select id="custCountry">
+                  <option value="Nigeria">Nigeria</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>State</label>
+                <select id="custState" onchange="updateShippingRate()">
+                  <option value="Lagos">Lagos (₦2,000)</option>
+                  <option value="Abuja">Abuja / Other States (₦4,500)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>City / Area</label>
+                <input type="text" id="custCity" placeholder="e.g. Lekki / Ikeja">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>Note for Merchant (Optional)</label>
+              <textarea id="custNote" rows="2" placeholder="Any special packaging or delivery instructions..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" style="margin-top: 1.5rem;">Proceed to Pay with Paystack</button>
+          </form>
+        </div>
+
+        <!-- RIGHT: ORDER SUMMARY -->
+        <div class="checkout-summary-side">
+          <h4 class="checkout-section-title">Your Order Summary</h4>
+          <div id="cartItemsList" class="cart-items-box"></div>
+          
+          <div class="summary-calc-box">
+            <div class="calc-row">
+              <span>Subtotal:</span>
+              <span>₦<span id="cartSubtotal">0</span></span>
+            </div>
+            <div class="calc-row">
+              <span>Shipping Fee:</span>
+              <span>₦<span id="shippingFee">2,000</span></span>
+            </div>
+            <div class="calc-row total-row">
+              <span>Total to Pay:</span>
+              <span>₦<span id="cartTotal">0</span></span>
+            </div>
+          </div>
+
+          <div class="payment-badge-box">
+            <span>🔒 Secured by <strong>Paystack</strong></span>
+            <div class="accepted-cards">💳 Cards • USSD • Transfer</div>
+          </div>
+        </div>
       </div>
-      <form id="checkoutForm">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="custName" required placeholder="e.g. Blessing Adeleke">
+    </div>
+  </div>
+
+  <!-- PRODUCT QUICK-VIEW MODAL -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-content product-modal-content">
+      <button class="close-btn modal-close-pos" onclick="closeProductModal()">&times;</button>
+      <div class="quickview-grid">
+        <div class="quickview-media" id="qvMedia"></div>
+        <div class="quickview-details">
+          <span class="card-tag" id="qvTag">NEW</span>
+          <h2 id="qvTitle" class="qv-title"></h2>
+          <div class="qv-rating">⭐⭐⭐⭐⭐ <span class="rating-text">(5.0 Customer Rating)</span></div>
+          <div class="card-price qv-price" id="qvPrice"></div>
+          <p class="qv-desc" id="qvDesc">Bespoke luxury gold craftsmanship designed for effortless elegance.</p>
+          
+          <div class="qv-qty-box">
+            <label>Quantity:</label>
+            <div class="qty-controls">
+              <button onclick="adjustQvQty(-1)">-</button>
+              <span id="qvQtyVal">1</span>
+              <button onclick="adjustQvQty(1)">+</button>
+            </div>
+          </div>
+
+          <button class="btn-primary qv-add-btn" onclick="addQvToBag()">Add to Cart</button>
+
+          <div class="qv-share-box">
+            <span>Share this piece:</span>
+            <div class="share-btns">
+              <a href="#" id="shareWa" target="_blank">📱 WhatsApp</a>
+              <a href="#" id="shareX" target="_blank">𝕏 Share</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT LOGIN / SIGNUP MODAL -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="accModalTitle">Customer Login / Register</h3>
+        <button class="close-btn" onclick="closeAccountModal()">&times;</button>
+      </div>
+      <form id="accountForm">
+        <div class="form-row-dual">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="accFirstName" required placeholder="Blessing">
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="accLastName" required placeholder="Adeleke">
+          </div>
         </div>
         <div class="form-group">
-          <label>WhatsApp Number</label>
-          <input type="tel" id="custPhone" required placeholder="08012345678">
+          <label>Email Address</label>
+          <input type="email" id="accEmail" required placeholder="blessing@gmail.com">
         </div>
         <div class="form-group">
-          <label>Delivery Address</label>
-          <textarea id="custAddress" rows="2" required placeholder="Full delivery address"></textarea>
+          <label>Phone Number</label>
+          <input type="tel" id="accPhone" required placeholder="08012345678">
         </div>
-        <button type="submit" class="btn-submit">Confirm Order & Pay</button>
+        <div class="form-group">
+          <label>Default Shipping Address</label>
+          <input type="text" id="accAddress" required placeholder="Street address">
+        </div>
+        <button type="submit" class="btn-submit">Save Account Details</button>
       </form>
     </div>
   </div>
