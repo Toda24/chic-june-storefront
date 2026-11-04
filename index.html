@@ -5,91 +5,181 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CHIC JUNE | Luxury Jewelry & Accessories</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Google Fonts for Luxury Aesthetic -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Paystack Inline JS (Ready for Live Payments) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
-  <!-- HEADER / BRANDING -->
-  <header>
-    <div class="brand-badge">CJ</div>
-    <h1>CHIC JUNE</h1>
-    <p class="tagline">Clothing & Luxury Jewelry Brand ✨</p>
-    
-    <div class="action-bar">
-      <button class="btn-secondary" onclick="openCareModal()">♡ Jewelry Care Guide</button>
-      <button class="cart-icon-btn" onclick="openCartModal()">
-        🛍️ Cart (<span id="cartBadge">0</span>)
+  <!-- ANNOUNCEMENT BAR -->
+  <div class="top-announcement">
+    <p>✨ WEAR YOUR SPARKLE WITH LOVE | FREE LAGOS DELIVERY ON ORDERS OVER ₦50,000 ✨</p>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="navbar">
+    <div class="nav-container">
+      <!-- DYNAMIC ANIMATED LOGO MATCHING HER IG BRAND -->
+      <a href="#" class="brand-logo" onclick="switchTab('home')">
+        <div class="logo-assembly-box">
+          <svg class="logo-svg" viewBox="0 0 100 100">
+            <circle class="logo-circle" cx="50" cy="50" r="45" />
+            <text class="logo-monogram" x="50%" y="60%" text-anchor="middle">CJ</text>
+          </svg>
+        </div>
+        <div class="brand-name-group">
+          <span class="logo-text">CHIC JUNE</span>
+          <span class="logo-sub">CLOTHING & JEWELRY BRAND ✨</span>
+        </div>
+      </a>
+
+      <!-- SPA TABS -->
+      <nav class="nav-links">
+        <button class="nav-tab active" onclick="switchTab('home')">Home</button>
+        <button class="nav-tab" onclick="switchTab('catalog')">New Collection</button>
+        <button class="nav-tab" onclick="switchTab('care')">Jewelry Care Guide</button>
+      </nav>
+
+      <button class="cart-btn" onclick="openCartModal()">
+        <span class="cart-icon">🛍️</span>
+        <span class="cart-text">Cart</span>
+        <span class="cart-badge" id="cartBadge">0</span>
       </button>
     </div>
   </header>
 
-  <!-- MAIN CATALOG -->
-  <main>
-    <div class="catalog-header">
-      <h2 class="section-title">New Collection</h2>
-      <span class="refresh-status" id="refreshStatus">Updated Live</span>
-    </div>
-    
-    <div class="grid" id="productGrid">
-      <!-- Dynamic Products Inserted by app.js -->
-    </div>
+  <main class="main-content">
+
+    <!-- PAGE 1: HOME & HERO SLIDESHOW -->
+    <section id="page-home" class="page-view active">
+      <div class="hero-slideshow-container">
+        <div class="slideshow">
+          <div class="slide active" style="background-image: url('https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=1600&q=80');"></div>
+          <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1611591475281-8ed284486c83?auto=format&fit=crop&w=1600&q=80');"></div>
+          <div class="slide" style="background-image: url('https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1600&q=80');"></div>
+        </div>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-text-content">
+          <p class="hero-badge reveal-item">EST. LUXURY SELECTION</p>
+          <h1 class="hero-title reveal-item">Crowning Your Unique Elegance</h1>
+          <p class="hero-subtitle reveal-item">Bespoke jewelry crafted for royalty. Explore our dynamic new arrivals.</p>
+          <div class="hero-btn-group reveal-item">
+            <button class="btn-primary" onclick="switchTab('catalog')">Shop New Collection</button>
+            <button class="btn-secondary" onclick="switchTab('care')">Care Guide ♡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURED GRID ON HOME PAGE -->
+      <section class="section-wrapper">
+        <div class="section-title-box">
+          <p class="section-tag">CURATED PIECES</p>
+          <h2 class="section-title">New Arrivals</h2>
+          <div class="title-line"></div>
+        </div>
+        <div class="product-grid" id="homeProductGrid"></div>
+      </section>
+    </section>
+
+    <!-- PAGE 2: FULL CATALOG / NEW COLLECTION -->
+    <section id="page-catalog" class="page-view">
+      <section class="section-wrapper">
+        <div class="section-title-box">
+          <p class="section-tag">HER MAJESTY'S CATALOG</p>
+          <h2 class="section-title">The Complete Collection</h2>
+          <div class="title-line"></div>
+        </div>
+        <div class="product-grid" id="fullProductGrid"></div>
+      </section>
+    </section>
+
+    <!-- PAGE 3: JEWELRY CARE GUIDE (MATCHING VALERIE'S IG POST) -->
+    <section id="page-care" class="page-view">
+      <section class="section-wrapper care-page-wrapper">
+        <div class="care-card-luxury">
+          <div class="care-card-header">
+            <p class="care-brand-tag">CHIC JUNE</p>
+            <h2 class="care-main-heading">A LITTLE LOVE FOR YOUR JEWELS ♡</h2>
+            <p class="care-intro">Keep your pieces beautiful with a little extra care.</p>
+          </div>
+
+          <div class="care-rules-list">
+            <div class="care-rule-row">
+              <span class="heart-bullet">♡</span>
+              <p><strong>Avoid water, perfume & harsh chemicals</strong></p>
+            </div>
+            <div class="care-rule-row">
+              <span class="heart-bullet">♡</span>
+              <p><strong>Store in a cool, dry place.</strong></p>
+            </div>
+            <div class="care-rule-row">
+              <span class="heart-bullet">♡</span>
+              <p><strong>Wipe gently after every wear.</strong></p>
+            </div>
+            <div class="care-rule-row">
+              <span class="heart-bullet">♡</span>
+              <p><strong>Keep pieces separately to avoid scratches.</strong></p>
+            </div>
+          </div>
+
+          <div class="care-card-footer">
+            <p>Thank you for shopping Chic June. <strong>Wear your sparkle with love! ✨</strong></p>
+            <button class="btn-primary" style="margin-top: 1.5rem;" onclick="switchTab('catalog')">Explore Catalog</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
   </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>CHIC JUNE</h3>
+        <p>Clothing & Luxury Jewelry Brand ✨</p>
+      </div>
+      <div class="footer-nav">
+        <a href="#" onclick="switchTab('home')">Home</a>
+        <a href="#" onclick="switchTab('catalog')">Collection</a>
+        <a href="#" onclick="switchTab('care')">Care Guide</a>
+        <a href="https://instagram.com/chic_.june" target="_blank">Instagram (@chic_.june)</a>
+      </div>
+    </div>
+    <div class="footer-copy">
+      <p>© Chic June Storefront. Built with ❤️ for Queen Valerie.</p>
+    </div>
+  </footer>
 
   <!-- CART & CHECKOUT MODAL -->
   <div class="modal-overlay" id="cartModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Your Order Summary</h3>
+        <h3>Your Shopping Bag</h3>
         <button class="close-btn" onclick="closeCartModal()">&times;</button>
       </div>
-
-      <div id="cartItems" class="cart-items-list"></div>
-      
-      <div class="cart-summary-total">
-        Total: <span>₦<span id="cartTotal">0</span></span>
+      <div id="cartItemsList" class="cart-items-box"></div>
+      <div class="cart-total-row">
+        <span>Total Amount:</span>
+        <span class="total-price-val">₦<span id="cartTotal">0</span></span>
       </div>
-
       <form id="checkoutForm">
-        <h4 class="form-section-heading">Delivery Details</h4>
         <div class="form-group">
-          <label for="custName">Full Name</label>
-          <input type="text" id="custName" required placeholder="e.g. Blessing Adebayo">
+          <label>Full Name</label>
+          <input type="text" id="custName" required placeholder="e.g. Blessing Adeleke">
         </div>
         <div class="form-group">
-          <label for="custPhone">WhatsApp / Phone Number</label>
+          <label>WhatsApp Number</label>
           <input type="tel" id="custPhone" required placeholder="08012345678">
         </div>
         <div class="form-group">
-          <label for="custAddress">Delivery Address (Lagos)</label>
-          <textarea id="custAddress" rows="2" required placeholder="House No, Street Name, Area"></textarea>
+          <label>Delivery Address</label>
+          <textarea id="custAddress" rows="2" required placeholder="Full delivery address"></textarea>
         </div>
-        <button type="submit" class="btn-submit" id="submitOrderBtn">Confirm Order & Pay</button>
+        <button type="submit" class="btn-submit">Confirm Order & Pay</button>
       </form>
-    </div>
-  </div>
-
-  <!-- JEWELRY CARE MODAL -->
-  <div class="modal-overlay" id="careModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="color: #5C0A1B; font-family: 'Playfair Display', serif;">A Little Love for Your Jewels ♡</h3>
-        <button class="close-btn" onclick="closeCareModal()">&times;</button>
-      </div>
-      <p style="font-size: 0.85rem; color: #666; margin-bottom: 0.8rem;">Keep your pieces beautiful with a little extra care:</p>
-      <ul class="care-list">
-        <li>✨ Avoid direct contact with water, perfume & harsh chemicals.</li>
-        <li>✨ Store in a cool, dry place when not in use.</li>
-        <li>✨ Wipe gently with a soft microfibre cloth after every wear.</li>
-        <li>✨ Keep pieces separately to avoid scratches.</li>
-      </ul>
-      <p style="margin-top: 1.2rem; text-align: center; font-size: 0.85rem; font-style: italic; color: #5C0A1B;">
-        Thank you for shopping Chic June. Wear your sparkle with love! ✨
-      </p>
     </div>
   </div>
 
