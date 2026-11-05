@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- PAYSTACK INLINE SDK -->
   <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
@@ -64,8 +63,8 @@
     <section id="page-home" class="page-view active">
       <div class="hero-slideshow-container">
         <div class="slideshow">
-          <div class="slide active" style="background-image: url('media/pic4.jpeg');"></div>
-          <div class="slide" style="background-image: url('media/pic3.jpeg');"></div>
+          <div class="slide active" style="background-image: url('images/pic4.jpeg');"></div>
+          <div class="slide" style="background-image: url('images/pic3.jpeg');"></div>
         </div>
         <div class="hero-overlay"></div>
         
@@ -92,7 +91,6 @@
           <div class="title-line"></div>
         </div>
 
-        <!-- CATEGORY TAB BAR -->
         <div class="category-tabs-bar">
           <button class="cat-tab active" onclick="filterCategory('All', this)">All</button>
           <button class="cat-tab" onclick="filterCategory('New Collection', this)">New Collection</button>
@@ -106,7 +104,7 @@
       </section>
     </section>
 
-    <!-- PAGE 3: ABOUT US (DEDICATED STORY PAGE) -->
+    <!-- PAGE 3: ABOUT US -->
     <section id="page-about" class="page-view">
       <section class="section-wrapper about-page-wrapper">
         <div class="about-hero-card">
@@ -148,14 +146,14 @@
           </div>
 
           <div class="care-card-footer">
-            <p>Thank you for shopping Chic June. <strong>Wear your sparkle with love! ✨</strong></p>
+            <p>Thank you for shopping with Chic June. <strong>Wear your sparkle with love! ✨</strong></p>
             <button class="btn-primary" style="margin-top: 1.5rem;" onclick="switchTab('catalog')">Explore Catalog</button>
           </div>
         </div>
       </section>
     </section>
 
-    <!-- PAGE 5: DEDICATED CHECKOUT PAGE -->
+    <!-- PAGE 5: CHECKOUT PAGE -->
     <section id="page-checkout" class="page-view">
       <section class="section-wrapper">
         <div class="section-title-box">
@@ -168,56 +166,49 @@
           <div class="checkout-form-side">
             <form id="checkoutForm">
               <div class="checkout-box-card">
-                <h4 class="checkout-section-title">1. Customer & Delivery Details</h4>
+                <h4 class="checkout-section-title">Delivery Details</h4>
                 <div class="customer-autofill-banner" id="autofillBanner">
-                  <span>✨ Logged in as <strong id="displayAuthUser">Guest</strong></span>
+                  <span>✨ Account: <strong id="displayAuthUser">Guest</strong></span>
                 </div>
 
                 <div class="form-group" style="margin-top: 1rem;">
                   <label>Shipping Address *</label>
-                  <input type="text" id="custAddress" required placeholder="House number, Street name, City">
-                </div>
-
-                <div class="form-row-dual">
-                  <div class="form-group">
-                    <label>State / Region *</label>
-                    <select id="custState" onchange="updateShippingRate()">
-                      <option value="Lagos">Lagos State (₦2,000)</option>
-                      <option value="Interstate">Interstate / Other States (₦4,500)</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label>Nearest Landmark / Area</label>
-                    <input type="text" id="custCity" placeholder="e.g. Lekki Phase 1 / Ikeja">
-                  </div>
+                  <input type="text" id="custAddress" required placeholder="House number, Street name, Area">
                 </div>
 
                 <div class="form-group" style="margin-top: 1rem;">
-                  <label>Note for Merchant (Optional)</label>
-                  <textarea id="custNote" rows="2" placeholder="Special delivery instructions..."></textarea>
+                  <label>Note for merchant (Optional)</label>
+                  <textarea id="custNote" rows="2" placeholder="Add any extra information for the merchant"></textarea>
+                </div>
+
+                <!-- DYNAMIC SHIPPING SELECTION BOX -->
+                <div class="shipping-select-trigger-box">
+                  <span class="shipping-box-title">CLICK HERE TO SELECT SHIPPING RATE</span>
+                  <button type="button" class="btn-select-shipping-trigger" onclick="openShippingModal()">SELECT A SHIPPING PRICE</button>
+                  <div id="selectedShippingDisplay" class="selected-shipping-badge" style="display:none;"></div>
                 </div>
               </div>
 
               <div class="checkout-box-card" style="margin-top: 1.5rem;">
-                <h4 class="checkout-section-title">2. Choose Payment Method</h4>
+                <h4 class="checkout-section-title">Choose payment method</h4>
                 <div class="payment-method-option active">
                   <input type="radio" checked name="paymethod" id="paystackMethod">
-                  <label for="paystackMethod">Secure Online Payment (Paystack)</label>
+                  <label for="paystackMethod">💳 Paystack (Cards, Bank Transfer, USSD)</label>
                 </div>
               </div>
 
-              <button type="submit" class="btn-submit" style="margin-top: 1.5rem; padding: 1rem; font-size: 1rem;">PLACE ORDER & PAY</button>
+              <button type="submit" class="btn-submit" style="margin-top: 1.5rem; padding: 1rem; font-size: 1rem;">PLACE ORDER</button>
             </form>
           </div>
 
           <div class="checkout-summary-side">
-            <h4 class="checkout-section-title">Your Order Summary</h4>
+            <h4 class="checkout-section-title">YOUR ORDER</h4>
             <div id="checkoutItemsList" class="cart-items-box"></div>
             
             <div class="summary-calc-box">
-              <div class="calc-row"><span>Subtotal:</span><span>₦<span id="chkSubtotal">0</span></span></div>
-              <div class="calc-row"><span>Shipping Fee:</span><span>₦<span id="chkShipping">2,000</span></span></div>
-              <div class="calc-row total-row"><span>Total to Pay:</span><span>₦<span id="chkTotal">0</span></span></div>
+              <div class="calc-row"><span>Subtotal</span><span>₦<span id="chkSubtotal">0</span></span></div>
+              <div class="calc-row"><span>Shipping</span><span>₦<span id="chkShipping">0</span></span></div>
+              <div class="calc-row total-row"><span>Total to pay</span><span>₦<span id="chkTotal">0</span></span></div>
             </div>
             
             <button class="btn-secondary" style="width:100%; margin-top:1rem; color:var(--burgundy); border-color:var(--burgundy);" onclick="switchTab('catalog')">← Continue Shopping</button>
@@ -228,7 +219,7 @@
 
   </main>
 
-  <!-- AUTHENTIC WHATSAPP WIDGET -->
+  <!-- OFFICIAL WHATSAPP FLOATING WIDGET -->
   <div class="whatsapp-widget-container" id="waWidget">
     <div class="wa-popup-box" id="waPopup">
       <div class="wa-popup-header">
@@ -253,9 +244,26 @@
       </div>
     </div>
 
+    <!-- EXACT WHATSAPP SVG EMBLEM BUTTON -->
     <button class="whatsapp-float" onclick="toggleWhatsAppPopup()" title="Chat on WhatsApp">
-      <span class="wa-icon">💬</span>
+      <svg class="wa-svg-icon" viewBox="0 0 32 32">
+        <path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.69 21.25L3 28l6.89-1.63A13 13 0 1 0 16 2zm0 24a11 11 0 0 1-5.6-1.53l-.4-.24-4.16.98 1-4-.27-.42A11 11 0 1 1 16 26zm6-8.17c-.33-.17-1.95-.96-2.25-1.07s-.52-.17-.74.17-.86 1.07-1.05 1.29-.39.24-.72.08a9.1 9.1 0 0 1-2.67-1.65 10 10 0 0 1-1.85-2.3c-.2-.33 0-.5.15-.67s.33-.39.5-.58a2.22 2.22 0 0 0 .33-.56.62.62 0 0 0 0-.58c-.08-.17-.74-1.78-1.02-2.44s-.54-.56-.74-.57h-.63a1.22 1.22 0 0 0-.88.41 3.7 3.7 0 0 0-1.15 2.76 6.43 6.43 0 0 0 1.34 3.4 14.7 14.7 0 0 0 5.66 5 18.7 18.7 0 0 0 1.89.7 4.54 4.54 0 0 0 2.09.13 3.42 3.42 0 0 0 2.25-1.58 2.77 2.77 0 0 0 .2-1.58c-.09-.16-.33-.25-.66-.42z"/>
+      </svg>
     </button>
+  </div>
+
+  <!-- SHIPPING RATE SELECTION MODAL -->
+  <div class="modal-overlay centered-modal" id="shippingModal">
+    <div class="modal-content shipping-modal-content">
+      <div class="modal-header">
+        <h3>Select Shipping</h3>
+        <button class="close-btn" onclick="closeShippingModal()">&times;</button>
+      </div>
+      <div class="shipping-modal-body">
+        <input type="text" id="shippingSearch" class="shipping-search-input" placeholder="Search shipping location..." oninput="filterShippingRates(this.value)">
+        <div class="shipping-options-list" id="shippingOptionsContainer"></div>
+      </div>
+    </div>
   </div>
 
   <!-- FOOTER -->
@@ -278,16 +286,14 @@
     </div>
   </footer>
 
-  <!-- CART SIDE-DRAWER MODAL (WITH CONTINUE SHOPPING & CLEAR CART) -->
+  <!-- CART SIDE-DRAWER -->
   <div class="modal-overlay" id="cartModal">
     <div class="cart-drawer-content">
       <div class="modal-header">
         <h3 id="cartDrawerTitle">Your Cart (0 items)</h3>
         <button class="close-btn" onclick="closeCartModal()">&times;</button>
       </div>
-      
       <div id="cartItemsList" class="cart-drawer-items"></div>
-
       <div class="cart-drawer-footer">
         <div class="calc-row" style="font-size: 1.05rem; font-weight: 700; color: var(--burgundy); margin-bottom: 1rem;">
           <span>Subtotal:</span>
@@ -302,17 +308,12 @@
     </div>
   </div>
 
-  <!-- AUTHENTICATION MODAL (LOGIN / SIGNUP + OTP) -->
-  <div class="modal-overlay" id="authModal">
+  <!-- AUTHENTICATION MODAL -->
+  <div class="modal-overlay centered-modal" id="authModal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="authModalTitle">Sign In</h3>
         <button class="close-btn" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <div class="auth-toggle-box">
-        <button id="authTabLogin" class="auth-toggle-btn active" onclick="switchAuthMode('login')">Login</button>
-        <button id="authTabSignup" class="auth-toggle-btn" onclick="switchAuthMode('signup')">Create Account</button>
       </div>
 
       <form id="loginForm" class="auth-form active">
@@ -324,33 +325,48 @@
           <label>Password</label>
           <input type="password" id="loginPassword" required placeholder="••••••••">
         </div>
-        <button type="submit" class="btn-submit">Login</button>
+        <div class="auth-sub-links">
+          <button type="button" class="link-btn-sub" onclick="switchAuthMode('forgot')">Forgot password?</button>
+        </div>
+        <button type="submit" class="btn-submit" style="margin-top:1rem;">Login</button>
+        <p class="auth-switch-prompt">Don't have an account? <a href="#" onclick="switchAuthMode('signup')">Sign Up</a></p>
       </form>
 
       <form id="signupForm" class="auth-form">
         <div class="form-row-dual">
           <div class="form-group">
-            <label>First Name</label>
+            <label>First Name *</label>
             <input type="text" id="signupFirstName" required placeholder="Blessing">
           </div>
           <div class="form-group">
-            <label>Last Name</label>
+            <label>Last Name *</label>
             <input type="text" id="signupLastName" required placeholder="Adeleke">
           </div>
         </div>
         <div class="form-group">
-          <label>Email Address</label>
+          <label>Email Address *</label>
           <input type="email" id="signupEmail" required placeholder="blessing@gmail.com">
         </div>
         <div class="form-group">
-          <label>Phone Number</label>
+          <label>Phone Number *</label>
           <input type="tel" id="signupPhone" required placeholder="08012345678">
         </div>
         <div class="form-group">
-          <label>Password</label>
+          <label>Password *</label>
           <input type="password" id="signupPassword" required placeholder="••••••••">
         </div>
         <button type="submit" class="btn-submit">Send Verification Code</button>
+        <p class="auth-switch-prompt">Already have an account? <a href="#" onclick="switchAuthMode('login')">Login</a></p>
+      </form>
+
+      <form id="forgotForm" class="auth-form">
+        <p class="otp-instructions">Enter your account email below. We'll send you an instant link to reset your password.</p>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="forgotEmail" required placeholder="yourname@gmail.com">
+        </div>
+        <button type="submit" class="btn-submit">Send Reset Link</button>
+        <p class="auth-switch-prompt"><a href="#" onclick="switchAuthMode('login')">← Back to Login</a></p>
       </form>
 
       <form id="otpForm" class="auth-form">
@@ -364,8 +380,8 @@
     </div>
   </div>
 
-  <!-- PRODUCT QUICK-VIEW MODAL WITH REVIEWS -->
-  <div class="modal-overlay" id="productModal">
+  <!-- PRODUCT QUICK-VIEW MODAL -->
+  <div class="modal-overlay centered-modal" id="productModal">
     <div class="modal-content product-modal-content">
       <button class="close-btn modal-close-pos" onclick="closeProductModal()">&times;</button>
       <div class="quickview-grid">
