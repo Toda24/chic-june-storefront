@@ -83,6 +83,12 @@ function switchTab(tabName) {
   if (tabName === 'checkout') renderCheckoutSummary();
 }
 
+function exploreCatalogFromAbout() {
+  const allTabBtn = document.querySelector('.cat-tab');
+  filterCategory('All', allTabBtn);
+  switchTab('catalog');
+}
+
 function handleSearch(query) {
   searchQuery = query.toLowerCase().trim();
   renderGrids();
@@ -398,6 +404,10 @@ function closeCartModal() {
 }
 
 function proceedToCheckoutPage() {
+  if (cart.length === 0) {
+    alert('Your shopping bag is empty! Please add at least one piece to your bag before proceeding.');
+    return;
+  }
   closeCartModal();
   switchTab('checkout');
 }
@@ -506,12 +516,20 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
 
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const password = document.getElementById('signupPassword').value;
+  const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+  if (password !== confirmPassword) {
+    alert('Passwords do not match! Please verify your password and try again.');
+    return;
+  }
+
   pendingSignupUser = {
     firstName: document.getElementById('signupFirstName').value,
     lastName: document.getElementById('signupLastName').value,
     email: document.getElementById('signupEmail').value,
     phone: document.getElementById('signupPhone').value,
-    password: document.getElementById('signupPassword').value
+    password: password
   };
 
   if (N8N_AUTH_WEBHOOK_URL) {

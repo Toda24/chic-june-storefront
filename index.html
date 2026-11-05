@@ -75,7 +75,7 @@
           <h1 class="hero-title">Crowning Your Unique Elegance</h1>
           <p class="hero-subtitle">Created for the girl who loves to look effortlessly chic, feel confident, and wear her sparkle with love. ✨</p>
           <div class="hero-btn-group">
-            <button class="btn-primary" onclick="switchTab('catalog')">Shop Collection</button>
+            <button class="btn-primary" onclick="exploreCatalogFromAbout()">Shop Collection</button>
             <button class="btn-secondary" onclick="switchTab('about')">Our Story ♡</button>
           </div>
         </div>
@@ -123,7 +123,7 @@
             <span class="sig-title">Founder & Creative Director, Chic June</span>
           </div>
 
-          <button class="btn-primary" style="margin-top: 2rem;" onclick="switchTab('catalog')">Explore Her Pieces</button>
+          <button class="btn-primary" style="margin-top: 2rem;" onclick="exploreCatalogFromAbout()">Explore Her Pieces</button>
         </div>
       </section>
     </section>
@@ -147,7 +147,7 @@
 
           <div class="care-card-footer">
             <p>Thank you for shopping with Chic June. <strong>Wear your sparkle with love! ✨</strong></p>
-            <button class="btn-primary" style="margin-top: 1.5rem;" onclick="switchTab('catalog')">Explore Catalog</button>
+            <button class="btn-primary" style="margin-top: 1.5rem;" onclick="exploreCatalogFromAbout()">Explore Catalog</button>
           </div>
         </div>
       </section>
@@ -181,7 +181,6 @@
                   <textarea id="custNote" rows="2" placeholder="Add any extra information for the merchant"></textarea>
                 </div>
 
-                <!-- DYNAMIC SHIPPING SELECTION BOX -->
                 <div class="shipping-select-trigger-box">
                   <span class="shipping-box-title">CLICK HERE TO SELECT SHIPPING RATE</span>
                   <button type="button" class="btn-select-shipping-trigger" onclick="openShippingModal()">SELECT A SHIPPING PRICE</button>
@@ -211,7 +210,7 @@
               <div class="calc-row total-row"><span>Total to pay</span><span>₦<span id="chkTotal">0</span></span></div>
             </div>
             
-            <button class="btn-secondary" style="width:100%; margin-top:1rem; color:var(--burgundy); border-color:var(--burgundy);" onclick="switchTab('catalog')">← Continue Shopping</button>
+            <button class="btn-secondary" style="width:100%; margin-top:1rem; color:var(--burgundy); border-color:var(--burgundy);" onclick="exploreCatalogFromAbout()">← Continue Shopping</button>
           </div>
         </div>
       </section>
@@ -244,7 +243,6 @@
       </div>
     </div>
 
-    <!-- EXACT WHATSAPP SVG EMBLEM BUTTON -->
     <button class="whatsapp-float" onclick="toggleWhatsAppPopup()" title="Chat on WhatsApp">
       <svg class="wa-svg-icon" viewBox="0 0 32 32">
         <path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.69 21.25L3 28l6.89-1.63A13 13 0 1 0 16 2zm0 24a11 11 0 0 1-5.6-1.53l-.4-.24-4.16.98 1-4-.27-.42A11 11 0 1 1 16 26zm6-8.17c-.33-.17-1.95-.96-2.25-1.07s-.52-.17-.74.17-.86 1.07-1.05 1.29-.39.24-.72.08a9.1 9.1 0 0 1-2.67-1.65 10 10 0 0 1-1.85-2.3c-.2-.33 0-.5.15-.67s.33-.39.5-.58a2.22 2.22 0 0 0 .33-.56.62.62 0 0 0 0-.58c-.08-.17-.74-1.78-1.02-2.44s-.54-.56-.74-.57h-.63a1.22 1.22 0 0 0-.88.41 3.7 3.7 0 0 0-1.15 2.76 6.43 6.43 0 0 0 1.34 3.4 14.7 14.7 0 0 0 5.66 5 18.7 18.7 0 0 0 1.89.7 4.54 4.54 0 0 0 2.09.13 3.42 3.42 0 0 0 2.25-1.58 2.77 2.77 0 0 0 .2-1.58c-.09-.16-.33-.25-.66-.42z"/>
@@ -275,7 +273,7 @@
       </div>
       <div class="footer-nav">
         <a href="#" onclick="switchTab('home')">Home</a>
-        <a href="#" onclick="switchTab('catalog')">Collection</a>
+        <a href="#" onclick="exploreCatalogFromAbout()">Collection</a>
         <a href="#" onclick="switchTab('about')">About</a>
         <a href="#" onclick="switchTab('care')">Care Guide</a>
         <a href="https://instagram.com/chic_.june" target="_blank">Instagram (@chic_.june)</a>
@@ -301,7 +299,7 @@
         </div>
         <button class="btn-submit" onclick="proceedToCheckoutPage()">Checkout</button>
         <div class="cart-drawer-actions">
-          <button class="link-btn-sub" onclick="closeCartModal(); switchTab('catalog');">Continue shopping</button>
+          <button class="link-btn-sub" onclick="closeCartModal(); exploreCatalogFromAbout();">Continue shopping</button>
           <button class="link-btn-sub text-danger" onclick="clearCart()">✕ Clear cart</button>
         </div>
       </div>
@@ -319,11 +317,11 @@
       <form id="loginForm" class="auth-form active">
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" id="loginEmail" required placeholder="yourname@gmail.com">
+          <input type="email" id="loginEmail" autocomplete="username" required placeholder="yourname@gmail.com">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="loginPassword" required placeholder="••••••••">
+          <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
         </div>
         <div class="auth-sub-links">
           <button type="button" class="link-btn-sub" onclick="switchAuthMode('forgot')">Forgot password?</button>
@@ -345,15 +343,19 @@
         </div>
         <div class="form-group">
           <label>Email Address *</label>
-          <input type="email" id="signupEmail" required placeholder="blessing@gmail.com">
+          <input type="email" id="signupEmail" autocomplete="email" required placeholder="blessing@gmail.com">
         </div>
         <div class="form-group">
           <label>Phone Number *</label>
-          <input type="tel" id="signupPhone" required placeholder="08012345678">
+          <input type="tel" id="signupPhone" autocomplete="tel" required placeholder="08012345678">
         </div>
         <div class="form-group">
           <label>Password *</label>
-          <input type="password" id="signupPassword" required placeholder="••••••••">
+          <input type="password" id="signupPassword" autocomplete="new-password" required placeholder="••••••••">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password *</label>
+          <input type="password" id="signupConfirmPassword" autocomplete="new-password" required placeholder="••••••••">
         </div>
         <button type="submit" class="btn-submit">Send Verification Code</button>
         <p class="auth-switch-prompt">Already have an account? <a href="#" onclick="switchAuthMode('login')">Login</a></p>

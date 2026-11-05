@@ -15,7 +15,7 @@ body { background-color: var(--bg-cream); color: var(--text-dark); font-family: 
 
 .top-announcement { background: var(--burgundy-dark); color: var(--gold); text-align: center; padding: 0.4rem 1rem; font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; border-bottom: 1px solid var(--gold); }
 .navbar { position: sticky; top: 0; z-index: 1000; background: rgba(92, 10, 27, 0.96); backdrop-filter: blur(12px); border-bottom: 1px solid var(--gold); padding: 0.8rem 1.5rem; }
-.nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+.nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-space-between: space-between; align-items: center; }
 
 .brand-logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; }
 .logo-img-wrapper { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; background: var(--burgundy-dark); }
@@ -183,7 +183,7 @@ body { background-color: var(--bg-cream); color: var(--text-dark); font-family: 
 .star-rating-select { font-size: 1.4rem; color: #CCC; cursor: pointer; margin: 0.4rem 0; }
 .star-rating-select span.selected { color: #F5A623; }
 
-/* OFFICIAL WHATSAPP FLOATING EMBLEM STYLING */
+/* WHATSAPP WIDGET EMBLEM STYLING */
 .whatsapp-widget-container { position: fixed; bottom: 25px; right: 25px; z-index: 1500; }
 .whatsapp-float { width: 56px; height: 56px; background-color: #25D366; color: white; border-radius: 50%; text-align: center; box-shadow: 0 6px 22px rgba(37, 211, 102, 0.45); display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; transition: transform 0.3s ease; }
 .whatsapp-float:hover { transform: scale(1.1); }
