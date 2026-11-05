@@ -1,47 +1,66 @@
 /**
- * CHIC JUNE - Professional E-Commerce Engine with State-Based Shipping & Paystack
+ * CHIC JUNE - Professional E-Commerce Engine with Valerie's Real Media & Scroll Motion
  */
 
 const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
 const N8N_PRODUCTS_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-products';
 const PAYSTACK_PUBLIC_KEY = 'pk_test_1234567890abcdef1234567890abcdef12345678';
 
+// Valerie's Actual Inventory & Media Mapping (Starting at her ₦4,000 baseline)
 let products = [
   { 
     id: 1, 
-    name: 'Gold Butterfly Pendant & Earring Set', 
-    price: 18500, 
+    name: 'Milan Shijia Gold Sculpted Drop Earrings', 
+    price: 4000, 
     tag: 'NEW COLLECTION', 
     mediaType: 'image', 
-    img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
-    desc: 'Handcrafted gold butterfly pendant set featuring sparkling pave cubic zirconia.' 
+    img: 'pic3.jpeg',
+    desc: 'S925 Post luxury gold sculpted fluid drop earrings featuring stunning polished curves.' 
   },
   { 
     id: 2, 
-    name: 'Minimalist Gold Cartier Bangles (Set of 3)', 
-    price: 14000, 
+    name: 'Uglyver Gold Ruffled Petal Earrings', 
+    price: 4000, 
     tag: 'BESTSELLER', 
     mediaType: 'image', 
-    img: 'https://images.unsplash.com/photo-1611591475281-8ed284486c83?auto=format&fit=crop&w=600&q=80',
-    desc: 'Sleek, tarnish-resistant stackable gold bangles designed for daily elegance.' 
+    img: 'pic4.jpeg',
+    desc: 'Exquisite gold-plated ruffled petal hoop earrings with secure S925 post backing.' 
   },
   { 
     id: 3, 
-    name: 'Royal Gemstone Charm Bracelet', 
-    price: 16500, 
-    tag: 'POPULAR', 
-    mediaType: 'image', 
-    img: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80',
-    desc: 'Luxurious gold charm bracelet with deep sapphire blue gemstone accents.' 
+    name: 'Sculpted Golden Wave Set (Reel)', 
+    price: 4500, 
+    tag: 'TRENDING', 
+    mediaType: 'video', 
+    img: 'GIF1.mp4',
+    desc: 'Signature gold statement piece captured live in studio.' 
   },
   { 
     id: 4, 
-    name: 'Heavy Link Statement Chain', 
-    price: 22000, 
+    name: 'Royal Heritage Gold Chain & Pendant', 
+    price: 5000, 
+    tag: 'POPULAR', 
+    mediaType: 'video', 
+    img: 'GIF2.mp4',
+    desc: 'Tarnish-resistant gold chain designed for everyday elegance.' 
+  },
+  { 
+    id: 5, 
+    name: 'Chic Layered Gold Anklet & Bracelet Set', 
+    price: 4000, 
     tag: 'NEW', 
-    mediaType: 'image', 
-    img: 'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80',
-    desc: 'Bold chunky Cuban link chain designed to stand out without trying too hard.' 
+    mediaType: 'video', 
+    img: 'GIF3.mp4',
+    desc: 'Delicate stacked gold accents for effortless charm.' 
+  },
+  { 
+    id: 6, 
+    name: 'Pave Cubic Zirconia Gold Band', 
+    price: 4000, 
+    tag: 'LIMITED', 
+    mediaType: 'video', 
+    img: 'GIF4.mp4',
+    desc: 'Shimmering pavé set gold band ring.' 
   }
 ];
 
@@ -69,7 +88,7 @@ async function fetchLiveProducts() {
       products = data;
     }
   } catch (err) {
-    console.warn('Using local fallback catalog:', err);
+    console.warn('Using local inventory fallback:', err);
   } finally {
     renderGrids();
   }
@@ -92,6 +111,9 @@ function switchTab(tabName) {
   if (tabName === 'care') {
     resetAndTriggerCareMotion();
   }
+  if (tabName === 'catalog') {
+    resetAndTriggerCatalogMotion();
+  }
 }
 
 function resetAndTriggerCareMotion() {
@@ -105,6 +127,25 @@ function resetAndTriggerCareMotion() {
           setTimeout(() => {
             entry.target.classList.add('active');
           }, index * 150);
+        }
+      });
+    }, { threshold: 0.05 });
+
+    reveals.forEach(el => observer.observe(el));
+  }, 150);
+}
+
+function resetAndTriggerCatalogMotion() {
+  const reveals = document.querySelectorAll('#fullProductGrid .reveal-stagger');
+  reveals.forEach(el => el.classList.remove('active'));
+
+  setTimeout(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add('active');
+          }, index * 120);
         }
       });
     }, { threshold: 0.05 });
@@ -129,10 +170,10 @@ function renderGrids() {
   const fullGrid = document.getElementById('fullProductGrid');
 
   const cardHTML = (p) => `
-    <div class="product-card" onclick="openProductModal(${p.id})">
+    <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
       <div class="card-media">
         ${p.mediaType === 'video' 
-          ? `<video src="${p.mediaUrl || p.img}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`
+          ? `<video src="${p.img || p.mediaUrl}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`
           : `<img src="${p.img || p.mediaUrl}" alt="${p.name}" />`}
         <span class="card-tag">${p.tag || 'NEW'}</span>
       </div>
@@ -147,7 +188,10 @@ function renderGrids() {
     </div>
   `;
 
-  if (fullGrid) fullGrid.innerHTML = products.map(cardHTML).join('');
+  if (fullGrid) {
+    fullGrid.innerHTML = products.map(cardHTML).join('');
+    resetAndTriggerCatalogMotion();
+  }
 }
 
 function openProductModal(id) {
@@ -165,7 +209,7 @@ function openProductModal(id) {
 
   const mediaBox = document.getElementById('qvMedia');
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${product.mediaUrl || product.img}" autoplay muted loop playsinline></video>`
+    ? `<video src="${product.img || product.mediaUrl}" autoplay muted loop playsinline></video>`
     : `<img src="${product.img || product.mediaUrl}" alt="${product.name}" />`;
 
   const pageUrl = encodeURIComponent(window.location.href);
@@ -263,7 +307,6 @@ function closeCartModal() {
   document.getElementById('cartModal').style.display = 'none';
 }
 
-// CHECKOUT & PAYSTACK INLINE
 document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   e.preventDefault();
   

@@ -393,6 +393,18 @@ body {
   justify-content: center;
 }
 
+/* SCROLL REVEAL STAGGER ANIMATION FOR CATALOG CARDS */
+.reveal-stagger {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-stagger.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .product-card {
   background: white;
   border-radius: 16px;
@@ -539,17 +551,6 @@ body {
   margin: 0 auto 2.5rem;
 }
 
-.reveal-stagger {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.reveal-stagger.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .care-rule-row {
   display: flex;
   align-items: flex-start;
@@ -602,7 +603,6 @@ body {
   transform: scale(1.1);
 }
 
-/* PROFESSIONAL CHECKOUT LAYOUT */
 .checkout-modal-box {
   max-width: 900px !important;
   width: 95% !important;
@@ -683,7 +683,6 @@ body {
   margin-top: 0.3rem;
 }
 
-/* PRODUCT QUICK-VIEW */
 .product-modal-content {
   max-width: 800px;
   position: relative;
