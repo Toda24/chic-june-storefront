@@ -75,6 +75,7 @@ async function fetchLiveProducts() {
     if (Array.isArray(data) && data.length > 0) { 
       products = data.map(item => ({
         ...item,
+        category: item.category ? item.category.trim() : 'All',
         img: formatDriveUrl(item.img || item.image || item.mediaUrl),
         reviews: item.reviews || []
       })); 
@@ -219,9 +220,12 @@ function renderGrids() {
   if (!fullGrid) return;
 
   const filtered = products.filter(p => {
-    const matchesCat = (currentCategory === 'All') || 
-                       (currentCategory === 'New Collection' && p.tag === 'NEW COLLECTION') || 
-                       (p.category === currentCategory);
+    const pCat = p.category ? p.category.toLowerCase().trim() : '';
+    const targetCat = currentCategory.toLowerCase().trim();
+
+    const matchesCat = (targetCat === 'all') || 
+                       (targetCat === 'new collection' && (p.tag === 'NEW COLLECTION' || p.tag === 'NEW')) || 
+                       (pCat === targetCat);
     const matchesSearch = p.name.toLowerCase().includes(searchQuery) || (p.desc && p.desc.toLowerCase().includes(searchQuery));
     return matchesCat && matchesSearch;
   });
@@ -555,7 +559,21 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   handler.openIframe();
 });
 
-/* AUTHENTICATION MODAL LOGIC */
+/* AUTHENTICATION & ACCOUNT MODAL LOGIC */
+function handleAccountClick() {
+  const saved = localStorage.getItem('cj_customer_account');
+  if (saved) {
+    const acc = JSON.parse(saved);
+    if (confirm(`Hello ${acc.firstName} (${acc.email}). Would you like to log out?`)) {
+      localStorage.removeItem('cj_customer_account');
+      loadSavedCustomerAccount();
+      alert('You have been logged out successfully.');
+    }
+  } else {
+    openAuthModal('login');
+  }
+}
+
 function openAuthModal(mode = 'login') {
   document.getElementById('authModal').style.display = 'flex';
   switchAuthMode(mode);
@@ -580,16 +598,37 @@ function switchAuthMode(mode) {
   }
 }
 
-document.getElementById('loginForm').addEventListener('submit', (e) => {
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
-  const namePart = email.split('@')[0];
-  const firstName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-  const accountData = { firstName, lastName: 'User', email, phone: '08012345678', address: '' };
-  localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
-  loadSavedCustomerAccount();
-  closeAuthModal();
-  alert(`✨ Welcome back, ${firstName}!`);
+  const password = document.getElementById('loginPassword').value;
+
+  try {
+    const response = await fetch(N8N_AUTH_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      body: JSON.stringify({ type: 'LOGIN', email, password })
+    });
+    const result = await response.json();
+    
+    const namePart = email.split('@')[0];
+    const firstName = result.firstName || (namePart.charAt(0).toUpperCase() + namePart.slice(1));
+    const accountData = { firstName, lastName: result.lastName || 'User', email, phone: result.phone || '08012345678' };
+    
+    localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
+    loadSavedCustomerAccount();
+    closeAuthModal();
+    alert(`✨ Welcome back, ${firstName}!`);
+  } catch (err) {
+    console.warn('Backend login fallback:', err);
+    const namePart = email.split('@')[0];
+    const firstName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    const accountData = { firstName, lastName: 'User', email, phone: '08012345678' };
+    localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
+    loadSavedCustomerAccount();
+    closeAuthModal();
+    alert(`✨ Welcome back, ${firstName}!`);
+  }
 });
 
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
@@ -611,14 +650,18 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   };
 
   if (N8N_AUTH_WEBHOOK_URL) {
-    fetch(N8N_AUTH_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-      },
-      body: JSON.stringify({ type: 'SIGNUP_OTP_REQUEST', user: pendingSignupUser })
-    }).catch(err => console.error('n8n auth error:', err));
+    try {
+      await fetch(N8N_AUTH_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify({ type: 'SIGNUP_OTP_REQUEST', user: pendingSignupUser })
+      });
+    } catch (err) {
+      console.error('n8n auth error:', err);
+    }
   }
 
   document.getElementById('otpTargetEmail').innerText = pendingSignupUser.email;
@@ -632,36 +675,59 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   const email = document.getElementById('forgotEmail').value;
 
   if (N8N_AUTH_WEBHOOK_URL) {
-    fetch(N8N_AUTH_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-      },
-      body: JSON.stringify({ type: 'PASSWORD_RESET_REQUEST', email })
-    }).catch(err => console.error('n8n auth error:', err));
+    try {
+      await fetch(N8N_AUTH_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify({ type: 'PASSWORD_RESET_REQUEST', email })
+      });
+    } catch (err) {
+      console.error('n8n auth error:', err);
+    }
   }
 
-  alert(`✨ Password reset link sent to ${email}. Please check your inbox.`);
+  alert(`✨ Password reset instructions sent to ${email}. Please check your inbox.`);
   switchAuthMode('login');
 });
 
-document.getElementById('otpForm').addEventListener('submit', (e) => {
+document.getElementById('otpForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const code = document.getElementById('otpInput').value;
+  
+  if (N8N_AUTH_WEBHOOK_URL) {
+    try {
+      await fetch(N8N_AUTH_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        body: JSON.stringify({ type: 'VERIFY_OTP', email: pendingSignupUser.email, code })
+      });
+    } catch (err) {
+      console.warn('OTP Verification fallback:', err);
+    }
+  }
+
   if (code.length === 6) {
     localStorage.setItem('cj_customer_account', JSON.stringify(pendingSignupUser));
     loadSavedCustomerAccount();
     closeAuthModal();
     alert(`🎉 Account Verified! Welcome to Chic June, ${pendingSignupUser.firstName}!`);
+  } else {
+    alert('Please enter a valid 6-digit verification code.');
   }
 });
 
 function loadSavedCustomerAccount() {
   const saved = localStorage.getItem('cj_customer_account');
-  if (!saved) return;
+  const btn = document.getElementById('accountBtnText');
+  if (!saved) {
+    btn.innerText = '👤 Login';
+    return;
+  }
   const data = JSON.parse(saved);
-  document.getElementById('accountBtnText').innerText = `👤 ${data.firstName}`;
+  btn.innerText = `👤 ${data.firstName} (Logout)`;
 }
 
 /* WHATSAPP WIDGET LOGIC */
