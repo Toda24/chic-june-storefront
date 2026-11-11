@@ -9,7 +9,7 @@ const N8N_AUTH_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook
 // ==========================================
 // VALERIE'S LIVE PAYSTACK PUBLIC KEY
 // ==========================================
-const PAYSTACK_PUBLIC_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
+const PAYSTACK_PUBLIC_KEY = 'pk_test_61aad50049dd811c85259a6012f33c57e4009193';
 const OFFICIAL_WHATSAPP_NUMBER = '2348167721448';
 
 let currentCategory = 'All';
