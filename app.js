@@ -109,8 +109,41 @@ function exploreCatalogFromAbout() {
   switchTab('catalog');
 }
 
+// REAL-TIME PREDICTIVE SEARCH AUTOCOMPLETE
 function handleSearch(query) {
   searchQuery = query.toLowerCase().trim();
+  renderGrids();
+
+  const dropdown = document.getElementById('searchAutocompleteDropdown');
+  if (!dropdown) return;
+
+  if (!searchQuery) {
+    dropdown.style.display = 'none';
+    return;
+  }
+
+  const matches = products.filter(p => 
+    p.name.toLowerCase().includes(searchQuery) || 
+    (p.category && p.category.toLowerCase().includes(searchQuery))
+  );
+
+  if (matches.length > 0) {
+    dropdown.style.display = 'block';
+    dropdown.innerHTML = matches.slice(0, 5).map(m => `
+      <div onclick="selectAutocompleteItem('${m.name}')" style="padding: 0.6rem 1rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; font-size: 0.8rem;">
+        <strong>${m.name}</strong> <span style="color: var(--gold); float: right;">₦${Number(m.price).toLocaleString()}</span>
+      </div>
+    `).join('');
+  } else {
+    dropdown.style.display = 'none';
+  }
+}
+
+function selectAutocompleteItem(name) {
+  document.getElementById('globalSearchInput').value = name;
+  searchQuery = name.toLowerCase().trim();
+  const dropdown = document.getElementById('searchAutocompleteDropdown');
+  if (dropdown) dropdown.style.display = 'none';
   renderGrids();
 }
 
@@ -403,7 +436,7 @@ function openCartModal() {
       return `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
-            <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden;">
+            <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden; flex-shrink:0;">
               <img src="${mediaSrc}" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div>
@@ -433,6 +466,15 @@ function proceedToCheckoutPage() {
   }
   closeCartModal();
   switchTab('checkout');
+}
+
+/* NEWSLETTER SUBMISSION HANDLER */
+function handleNewsletterSubmit(e) {
+  e.preventDefault();
+  const val = document.getElementById('newsletterInput').value.trim();
+  if (!val) return;
+  alert('✨ Thank you for subscribing to Chic June! You are officially on the VIP list.');
+  document.getElementById('newsletterForm').reset();
 }
 
 /* CHECKOUT SUBMISSION */
