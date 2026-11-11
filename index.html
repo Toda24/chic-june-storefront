@@ -3,429 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CHIC JUNE | Luxury Jewelry & Accessories</title>
+  <title>Chic June — Clothing & Luxury Jewelry Brand</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body>
 
-  <!-- ANNOUNCEMENT BAR -->
-  <div class="top-announcement">
-    <p>✨ WEAR YOUR SPARKLE WITH LOVE | FREE LAGOS DELIVERY ON ORDERS OVER ₦50,000 ✨</p>
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    ✨ Wear your sparkle with love... Worldwide shipping available ✨
   </div>
 
-  <!-- NAVIGATION HEADER -->
-  <header class="navbar">
-    <div class="nav-container">
-      <a href="#" class="brand-logo" onclick="switchTab('home')">
-        <div class="logo-img-wrapper">
-          <img src="logo.jpg" alt="Chic June Crest" class="brand-crest-img">
-        </div>
-        <div class="brand-name-group">
-          <span class="logo-text">CHIC JUNE</span>
-          <span class="logo-sub">CLOTHING & JEWELRY BRAND ✨</span>
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand-logo-wrap">
+        <div>
+          <div class="brand-title">CHIC JUNE</div>
+          <div class="brand-subtitle">CLOTHING & LUXURY JEWELRY BRAND ✨</div>
         </div>
       </a>
 
-      <!-- SEARCH BAR -->
-      <div class="nav-search-box">
-        <input type="text" id="globalSearchInput" placeholder="Search earrings, necklaces..." oninput="handleSearch(this.value)">
-        <span class="search-icon">🔍</span>
+      <!-- Search Wrapper with Autocomplete Dropdown -->
+      <div class="search-wrapper">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search earrings, necklaces, rings...">
+        <div id="searchDropdown" class="search-results-dropdown"></div>
       </div>
 
-      <!-- NAVIGATION TABS -->
-      <nav class="nav-links">
-        <button class="nav-tab active" onclick="switchTab('home')">Home</button>
-        <button class="nav-tab" onclick="switchTab('catalog')">Collection</button>
-        <button class="nav-tab" onclick="switchTab('about')">About</button>
-        <button class="nav-tab" onclick="switchTab('care')">Care Guide</button>
-      </nav>
-
-      <div class="nav-actions">
-        <button class="account-btn" onclick="openAuthModal('login')">
-          <span id="accountBtnText">👤 Login</span>
-        </button>
-        <button class="cart-btn" onclick="openCartModal()">
-          <span class="cart-icon">🛍️</span>
-          <span class="cart-text">Bag</span>
-          <span class="cart-badge" id="cartBadge">0</span>
-        </button>
-      </div>
+      <button class="bag-btn" id="cartToggle">
+        <span>Bag</span>
+        <span class="bag-count" id="cartCount">0</span>
+      </button>
     </div>
   </header>
 
-  <main class="main-content">
-
-    <!-- PAGE 1: HOME -->
-    <section id="page-home" class="page-view active">
-      <div class="hero-slideshow-container">
-        <div class="slideshow">
-          <div class="slide active" style="background-image: url('images/pic4.jpeg');"></div>
-          <div class="slide" style="background-image: url('images/pic3.jpeg');"></div>
-        </div>
-        <div class="hero-overlay"></div>
-        
-        <div class="hero-text-content">
-          <div class="hero-logo-center">
-            <img src="logo.jpg" alt="Chic June Luxury Crest" class="hero-crest-img">
-          </div>
-          <h1 class="hero-title">Crowning Your Unique Elegance</h1>
-          <p class="hero-subtitle">Created for the girl who loves to look effortlessly chic, feel confident, and wear her sparkle with love. ✨</p>
-          <div class="hero-btn-group">
-            <button class="btn-primary" onclick="exploreCatalogFromAbout()">Shop Collection</button>
-            <button class="btn-secondary" onclick="switchTab('about')">Our Story ♡</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PAGE 2: CATALOG & COLLECTION -->
-    <section id="page-catalog" class="page-view">
-      <section class="section-wrapper">
-        <div class="section-title-box">
-          <p class="section-tag">HER MAJESTY'S CATALOG</p>
-          <h2 class="section-title">Luxury Collections</h2>
-          <div class="title-line"></div>
-        </div>
-
-        <div class="category-tabs-bar">
-          <button class="cat-tab active" onclick="filterCategory('All', this)">All</button>
-          <button class="cat-tab" onclick="filterCategory('New Collection', this)">New Collection</button>
-          <button class="cat-tab" onclick="filterCategory('Earrings', this)">Earrings</button>
-          <button class="cat-tab" onclick="filterCategory('Necklaces', this)">Necklaces</button>
-          <button class="cat-tab" onclick="filterCategory('Bracelets', this)">Bracelets</button>
-          <button class="cat-tab" onclick="filterCategory('Rings', this)">Rings</button>
-        </div>
-
-        <div class="product-grid" id="fullProductGrid"></div>
-      </section>
-    </section>
-
-    <!-- PAGE 3: ABOUT US -->
-    <section id="page-about" class="page-view">
-      <section class="section-wrapper about-page-wrapper">
-        <div class="about-hero-card">
-          <div class="about-corner-emoji top-left">✨</div>
-          <div class="about-corner-emoji top-right">👑</div>
-          <span class="story-tag">THE CHIC JUNE STORY</span>
-          <h2 class="about-heading">"Turning a childhood fascination into something of my own."</h2>
-          
-          <div class="about-body-text">
-            <p>Funny story, I was always fascinated by my aunt’s jewelry stand at her mall. Anytime I visited, I would find myself drawn to all the pretty, sparkling pieces. I guess the love for jewelry started way back then. 🥹</p>
-            <p>Little did I know that one day, that same love would inspire me to start my own brand. And now, here we are at <strong>Chic June</strong>—created to inspire every girl to embrace her unique shine, look effortlessly chic, and wear her confidence daily! ✨</p>
-          </div>
-
-          <div class="about-signature">
-            <span class="sig-name">Valerie 🌹</span>
-            <span class="sig-title">Founder & Creative Director, Chic June</span>
-          </div>
-
-          <button class="btn-primary" style="margin-top: 2rem;" onclick="exploreCatalogFromAbout()">Explore Her Pieces</button>
-        </div>
-      </section>
-    </section>
-
-    <!-- PAGE 4: JEWELRY CARE GUIDE -->
-    <section id="page-care" class="page-view">
-      <section class="section-wrapper care-page-wrapper">
-        <div class="care-card-luxury">
-          <div class="care-card-header">
-            <img src="logo.jpg" alt="Chic June Crest" class="care-logo-img">
-            <h2 class="care-main-heading">A LITTLE LOVE FOR YOUR JEWELS ♡</h2>
-            <p class="care-intro">Keep your pieces beautiful with a little extra care.</p>
-          </div>
-
-          <div class="care-rules-list">
-            <div class="care-rule-row reveal-stagger"><span class="heart-bullet">♡</span><p><strong>Avoid water, perfume & harsh chemicals</strong></p></div>
-            <div class="care-rule-row reveal-stagger"><span class="heart-bullet">♡</span><p><strong>Store in a cool, dry place.</strong></p></div>
-            <div class="care-rule-row reveal-stagger"><span class="heart-bullet">♡</span><p><strong>Wipe gently after every wear.</strong></p></div>
-            <div class="care-rule-row reveal-stagger"><span class="heart-bullet">♡</span><p><strong>Keep pieces separately to avoid scratches.</strong></p></div>
-          </div>
-
-          <div class="care-card-footer">
-            <p>Thank you for shopping with Chic June. <strong>Wear your sparkle with love! ✨</strong></p>
-            <button class="btn-primary" style="margin-top: 1.5rem;" onclick="exploreCatalogFromAbout()">Explore Catalog</button>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <!-- PAGE 5: CHECKOUT PAGE -->
-    <section id="page-checkout" class="page-view">
-      <section class="section-wrapper">
-        <div class="section-title-box">
-          <p class="section-tag">SECURE PAYMENT</p>
-          <h2 class="section-title">Checkout</h2>
-          <div class="title-line"></div>
-        </div>
-
-        <div class="checkout-page-layout">
-          <div class="checkout-form-side">
-            <form id="checkoutForm">
-              <div class="checkout-box-card">
-                <h4 class="checkout-section-title">Delivery Details</h4>
-                <div class="customer-autofill-banner" id="autofillBanner">
-                  <span>✨ Account: <strong id="displayAuthUser">Guest</strong></span>
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
-                  <label>Shipping Address *</label>
-                  <input type="text" id="custAddress" required placeholder="House number, Street name, Area">
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
-                  <label>Note for merchant (Optional)</label>
-                  <textarea id="custNote" rows="2" placeholder="Add any extra information for the merchant"></textarea>
-                </div>
-
-                <div class="shipping-select-trigger-box">
-                  <span class="shipping-box-title">CLICK HERE TO SELECT SHIPPING RATE</span>
-                  <button type="button" class="btn-select-shipping-trigger" onclick="openShippingModal()">SELECT A SHIPPING PRICE</button>
-                  <div id="selectedShippingDisplay" class="selected-shipping-badge" style="display:none;"></div>
-                </div>
-              </div>
-
-              <div class="checkout-box-card" style="margin-top: 1.5rem;">
-                <h4 class="checkout-section-title">Choose payment method</h4>
-                <div class="payment-method-option active">
-                  <input type="radio" checked name="paymethod" id="paystackMethod">
-                  <label for="paystackMethod">💳 Paystack (Cards, Bank Transfer, USSD)</label>
-                </div>
-              </div>
-
-              <button type="submit" class="btn-submit" style="margin-top: 1.5rem; padding: 1rem; font-size: 1rem;">PLACE ORDER</button>
-            </form>
-          </div>
-
-          <div class="checkout-summary-side">
-            <h4 class="checkout-section-title">YOUR ORDER</h4>
-            <div id="checkoutItemsList" class="cart-items-box"></div>
-            
-            <div class="summary-calc-box">
-              <div class="calc-row"><span>Subtotal</span><span>₦<span id="chkSubtotal">0</span></span></div>
-              <div class="calc-row"><span>Shipping</span><span>₦<span id="chkShipping">0</span></span></div>
-              <div class="calc-row total-row"><span>Total to pay</span><span>₦<span id="chkTotal">0</span></span></div>
-            </div>
-            
-            <button class="btn-secondary" style="width:100%; margin-top:1rem; color:var(--burgundy); border-color:var(--burgundy);" onclick="exploreCatalogFromAbout()">← Continue Shopping</button>
-          </div>
-        </div>
-      </section>
-    </section>
-
+  <main>
+    <div class="product-grid" id="productGrid">
+      <!-- Dynamic products injected via app.js -->
+    </div>
   </main>
 
-  <!-- OFFICIAL WHATSAPP FLOATING WIDGET -->
-  <div class="whatsapp-widget-container" id="waWidget">
-    <div class="wa-popup-box" id="waPopup">
-      <div class="wa-popup-header">
-        <div class="wa-profile-info">
-          <img src="logo.jpg" alt="Chic June" class="wa-avatar">
-          <div>
-            <div class="wa-name">chic_june</div>
-            <div class="wa-status">Typically replies within 10 minutes</div>
-          </div>
-        </div>
-        <button class="wa-close" onclick="toggleWhatsAppPopup()">&times;</button>
-      </div>
-      <div class="wa-popup-body">
-        <div class="wa-bubble">
-          Hi, welcome to Chic June, how can we help you today 😊
-          <span class="wa-time">Just now</span>
-        </div>
-      </div>
-      <div class="wa-popup-footer">
-        <input type="text" id="waInputText" placeholder="Type a message.." onkeypress="handleWaKeypress(event)">
-        <button onclick="sendWhatsAppMessage()">➤</button>
-      </div>
+  <!-- Cart Side Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h2>Your Royal Bag</h2>
+      <button id="closeCart" class="close-btn">&times;</button>
     </div>
-
-    <button class="whatsapp-float" onclick="toggleWhatsAppPopup()" title="Chat on WhatsApp">
-      <svg class="wa-svg-icon" viewBox="0 0 32 32">
-        <path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.69 21.25L3 28l6.89-1.63A13 13 0 1 0 16 2zm0 24a11 11 0 0 1-5.6-1.53l-.4-.24-4.16.98 1-4-.27-.42A11 11 0 1 1 16 26zm6-8.17c-.33-.17-1.95-.96-2.25-1.07s-.52-.17-.74.17-.86 1.07-1.05 1.29-.39.24-.72.08a9.1 9.1 0 0 1-2.67-1.65 10 10 0 0 1-1.85-2.3c-.2-.33 0-.5.15-.67s.33-.39.5-.58a2.22 2.22 0 0 0 .33-.56.62.62 0 0 0 0-.58c-.08-.17-.74-1.78-1.02-2.44s-.54-.56-.74-.57h-.63a1.22 1.22 0 0 0-.88.41 3.7 3.7 0 0 0-1.15 2.76 6.43 6.43 0 0 0 1.34 3.4 14.7 14.7 0 0 0 5.66 5 18.7 18.7 0 0 0 1.89.7 4.54 4.54 0 0 0 2.09.13 3.42 3.42 0 0 0 2.25-1.58 2.77 2.77 0 0 0 .2-1.58c-.09-.16-.33-.25-.66-.42z"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- SHIPPING RATE SELECTION MODAL -->
-  <div class="modal-overlay centered-modal" id="shippingModal">
-    <div class="modal-content shipping-modal-content">
-      <div class="modal-header">
-        <h3>Select Shipping</h3>
-        <button class="close-btn" onclick="closeShippingModal()">&times;</button>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Total:</span>
+        <span id="cartTotal">₦0</span>
       </div>
-      <div class="shipping-modal-body">
-        <input type="text" id="shippingSearch" class="shipping-search-input" placeholder="Search shipping location..." oninput="filterShippingRates(this.value)">
-        <div class="shipping-options-list" id="shippingOptionsContainer"></div>
-      </div>
+      <button class="checkout-btn" id="checkoutBtn">Checkout with Paystack</button>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <h3>CHIC JUNE</h3>
-        <p>Clothing & Luxury Jewelry Brand ✨</p>
-      </div>
-      <div class="footer-nav">
-        <a href="#" onclick="switchTab('home')">Home</a>
-        <a href="#" onclick="exploreCatalogFromAbout()">Collection</a>
-        <a href="#" onclick="switchTab('about')">About</a>
-        <a href="#" onclick="switchTab('care')">Care Guide</a>
-        <a href="https://instagram.com/chic_.june" target="_blank">Instagram (@chic_.june)</a>
-      </div>
-    </div>
-    <div class="footer-copy">
-      <p>© Chic June Luxury Storefront. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <!-- CART SIDE-DRAWER -->
-  <div class="modal-overlay" id="cartModal">
-    <div class="cart-drawer-content">
-      <div class="modal-header">
-        <h3 id="cartDrawerTitle">Your Cart (0 items)</h3>
-        <button class="close-btn" onclick="closeCartModal()">&times;</button>
-      </div>
-      <div id="cartItemsList" class="cart-drawer-items"></div>
-      <div class="cart-drawer-footer">
-        <div class="calc-row" style="font-size: 1.05rem; font-weight: 700; color: var(--burgundy); margin-bottom: 1rem;">
-          <span>Subtotal:</span>
-          <span>₦<span id="cartSubtotal">0</span></span>
-        </div>
-        <button class="btn-submit" onclick="proceedToCheckoutPage()">Checkout</button>
-        <div class="cart-drawer-actions">
-          <button class="link-btn-sub" onclick="closeCartModal(); exploreCatalogFromAbout();">Continue shopping</button>
-          <button class="link-btn-sub text-danger" onclick="clearCart()">✕ Clear cart</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AUTHENTICATION MODAL -->
-  <div class="modal-overlay centered-modal" id="authModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="authModalTitle">Sign In</h3>
-        <button class="close-btn" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <form id="loginForm" class="auth-form active">
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="loginEmail" autocomplete="username" required placeholder="yourname@gmail.com">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
-        </div>
-        <div class="auth-sub-links">
-          <button type="button" class="link-btn-sub" onclick="switchAuthMode('forgot')">Forgot password?</button>
-        </div>
-        <button type="submit" class="btn-submit" style="margin-top:1rem;">Login</button>
-        <p class="auth-switch-prompt">Don't have an account? <a href="#" onclick="switchAuthMode('signup')">Sign Up</a></p>
-      </form>
-
-      <form id="signupForm" class="auth-form">
-        <div class="form-row-dual">
-          <div class="form-group">
-            <label>First Name *</label>
-            <input type="text" id="signupFirstName" required placeholder="Blessing">
-          </div>
-          <div class="form-group">
-            <label>Last Name *</label>
-            <input type="text" id="signupLastName" required placeholder="Adeleke">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Email Address *</label>
-          <input type="email" id="signupEmail" autocomplete="email" required placeholder="blessing@gmail.com">
-        </div>
-        <div class="form-group">
-          <label>Phone Number *</label>
-          <input type="tel" id="signupPhone" autocomplete="tel" required placeholder="08012345678">
-        </div>
-        <div class="form-group">
-          <label>Password *</label>
-          <input type="password" id="signupPassword" autocomplete="new-password" required placeholder="••••••••">
-        </div>
-        <div class="form-group">
-          <label>Confirm Password *</label>
-          <input type="password" id="signupConfirmPassword" autocomplete="new-password" required placeholder="••••••••">
-        </div>
-        <button type="submit" class="btn-submit">Send Verification Code</button>
-        <p class="auth-switch-prompt">Already have an account? <a href="#" onclick="switchAuthMode('login')">Login</a></p>
-      </form>
-
-      <form id="forgotForm" class="auth-form">
-        <p class="otp-instructions">Enter your account email below. We'll send you an instant link to reset your password.</p>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="forgotEmail" required placeholder="yourname@gmail.com">
-        </div>
-        <button type="submit" class="btn-submit">Send Reset Link</button>
-        <p class="auth-switch-prompt"><a href="#" onclick="switchAuthMode('login')">← Back to Login</a></p>
-      </form>
-
-      <form id="otpForm" class="auth-form">
-        <p class="otp-instructions">We sent a 6-digit verification code to <strong id="otpTargetEmail">your email</strong>. Please enter it below.</p>
-        <div class="form-group">
-          <label>6-Digit Verification Code</label>
-          <input type="text" id="otpInput" maxlength="6" required placeholder="123456" style="text-align:center; letter-spacing:4px; font-weight:700; font-size:1.2rem;">
-        </div>
-        <button type="submit" class="btn-submit">Verify Account & Sign In</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- PRODUCT QUICK-VIEW MODAL -->
-  <div class="modal-overlay centered-modal" id="productModal">
-    <div class="modal-content product-modal-content">
-      <button class="close-btn modal-close-pos" onclick="closeProductModal()">&times;</button>
-      <div class="quickview-grid">
-        <div class="quickview-media" id="qvMedia"></div>
-        <div class="quickview-details">
-          <span class="card-tag" id="qvTag">NEW</span>
-          <h2 id="qvTitle" class="qv-title"></h2>
-          
-          <div class="qv-rating-line">
-            <span id="qvRatingStars">⭐ No reviews yet</span>
-            <span class="rating-text" id="qvReviewCount">(0 reviews)</span>
-          </div>
-          
-          <div class="card-price qv-price" id="qvPrice"></div>
-          <p class="qv-desc" id="qvDesc"></p>
-
-          <div class="qv-qty-box">
-            <label>Quantity:</label>
-            <div class="qty-controls">
-              <button onclick="adjustQvQty(-1)">-</button>
-              <span id="qvQtyVal">1</span>
-              <button onclick="adjustQvQty(1)">+</button>
-            </div>
-          </div>
-
-          <button class="btn-primary qv-add-btn" onclick="addQvToBag()">Add to Cart</button>
-
-          <div class="qv-review-section">
-            <h4>Leave a Review</h4>
-            <div class="star-rating-select" id="starSelect">
-              <span data-star="1" onclick="selectStarRating(1)">★</span>
-              <span data-star="2" onclick="selectStarRating(2)">★</span>
-              <span data-star="3" onclick="selectStarRating(3)">★</span>
-              <span data-star="4" onclick="selectStarRating(4)">★</span>
-              <span data-star="5" onclick="selectStarRating(5)">★</span>
-            </div>
-            <textarea id="reviewComment" rows="2" placeholder="Write your review for this piece..."></textarea>
-            <button class="btn-secondary" style="width:100%; margin-top:0.5rem; padding:0.5rem; font-size:0.8rem;" onclick="submitProductReview()">Submit Review</button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Floating WhatsApp Widget -->
+  <div class="whatsapp-widget" title="Chat with Us">
+    💬
   </div>
 
   <script src="app.js"></script>
