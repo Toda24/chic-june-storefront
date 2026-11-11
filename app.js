@@ -68,7 +68,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function fetchLiveProducts() {
   if (!N8N_PRODUCTS_URL) { renderGrids(); return; }
   try {
-    const response = await fetch(N8N_PRODUCTS_URL);
+    const response = await fetch(N8N_PRODUCTS_URL, {
+      headers: { 'ngrok-skip-browser-warning': 'true' }
+    });
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) { 
       products = data.map(item => ({
@@ -477,7 +479,42 @@ function handleNewsletterSubmit(e) {
   document.getElementById('newsletterForm').reset();
 }
 
-/* CHECKOUT SUBMISSION */
+/* CHECKOUT SUBMISSION & ASYNC ORDER PROCESSOR */
+async function processSuccessfulOrder(response, orderId, customerInfo, address, subtotal, totalAmount) {
+  const payload = {
+    orderId,
+    paymentReference: response.reference,
+    timestamp: new Date().toISOString(),
+    customer: { ...customerInfo, address, shippingZone: selectedShippingOption.title, note: document.getElementById('custNote').value },
+    items: cart,
+    subtotal,
+    shippingFee: currentShippingFee,
+    totalPrice: totalAmount,
+    status: 'PAID'
+  };
+
+  if (N8N_ORDER_WEBHOOK_URL) {
+    try {
+      await fetch(N8N_ORDER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error('n8n post error:', err);
+    }
+  }
+
+  alert(`🎉 Payment Successful!\n\nReference: ${response.reference}\nThank you, ${customerInfo.firstName}! Valerie will prepare your order.`);
+  cart = [];
+  updateCartBadge();
+  switchTab('home');
+  document.getElementById('checkoutForm').reset();
+}
+
 document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   e.preventDefault();
   if (cart.length === 0) { alert('Please add at least one item to your bag!'); return; }
@@ -509,44 +546,10 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
         { display_name: "Merchant Note", variable_name: "merchant_note", value: note }
       ]
     },
-    callback: async function(response) {
-  const payload = {
-    orderId,
-    paymentReference: response.reference,
-    timestamp: new Date().toISOString(),
-    customer: { ...customerInfo, address, shippingZone: selectedShippingOption.title, note },
-    items: cart,
-    subtotal,
-    shippingFee: currentShippingFee,
-    totalPrice: totalAmount,
-    status: 'PAID'
-  };
-
-  if (N8N_ORDER_WEBHOOK_URL) {
-    try {
-      const res = await fetch(N8N_ORDER_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify(payload)
-      });
-      console.log('n8n webhook response:', res.status);
-    } catch (err) {
-      console.error('n8n post error:', err);
-    }
-  } else {
-    console.warn('N8N_ORDER_WEBHOOK_URL is not defined!');
-  }
-
-  alert(`🎉 Payment Successful!\n\nReference: ${response.reference}\nThank you, ${customerInfo.firstName}! Valerie will prepare your order.`);
-  cart = [];
-  updateCartBadge();
-  switchTab('home');
-  document.getElementById('checkoutForm').reset();
-},
-onClose: function() { alert('Payment window closed.'); }
+    callback: function(response) {
+      processSuccessfulOrder(response, orderId, customerInfo, address, subtotal, totalAmount);
+    },
+    onClose: function() { alert('Payment window closed.'); }
   });
 
   handler.openIframe();
@@ -610,7 +613,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   if (N8N_AUTH_WEBHOOK_URL) {
     fetch(N8N_AUTH_WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
       body: JSON.stringify({ type: 'SIGNUP_OTP_REQUEST', user: pendingSignupUser })
     }).catch(err => console.error('n8n auth error:', err));
   }
@@ -628,7 +634,10 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   if (N8N_AUTH_WEBHOOK_URL) {
     fetch(N8N_AUTH_WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
       body: JSON.stringify({ type: 'PASSWORD_RESET_REQUEST', email })
     }).catch(err => console.error('n8n auth error:', err));
   }
