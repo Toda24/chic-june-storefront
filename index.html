@@ -3,66 +3,264 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chic June — Clothing & Luxury Jewelry Brand</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Chic June — E-Commerce Store</title>
   <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    :root {
+      --primary: #d63384;
+      --primary-dark: #b8256f;
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --text: #212529;
+      --border: #e9ecef;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+    header {
+      position: sticky; top: 0; z-index: 100; background: #fff;
+      padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .header-container {
+      max-width: 1100px; margin: 0 auto; display: flex;
+      flex-direction: column; gap: 0.75rem;
+    }
+    @media (min-width: 600px) {
+      .header-container { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+
+    .brand { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+    
+    .search-wrapper { position: relative; flex-grow: 1; max-width: 500px; }
+    .search-input {
+      width: 100%; padding: 0.65rem 1rem; border: 1px solid var(--border);
+      border-radius: 20px; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    .cart-btn {
+      position: relative; background: var(--primary); color: #fff;
+      border: none; padding: 0.65rem 1.25rem; border-radius: 20px;
+      font-weight: 600; cursor: pointer; min-height: 44px; min-width: 44px;
+    }
+    .cart-count {
+      position: absolute; top: -6px; right: -6px; background: #000;
+      color: #fff; font-size: 0.75rem; width: 20px; height: 20px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
+
+    main { max-width: 1100px; margin: 1.5rem auto; padding: 0 1rem; }
+    .product-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    @media (min-width: 600px) {
+      .product-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+    }
+
+    .product-card {
+      background: var(--card-bg); border-radius: 12px; overflow: hidden;
+      border: 1px solid var(--border); display: flex; flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    
+    .img-container { width: 100%; height: 180px; background: #eee; overflow: hidden; }
+    .img-container img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .card-body { padding: 0.85rem; display: flex; flex-direction: column; flex-grow: 1; }
+    .product-name { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .product-price { font-size: 0.95rem; color: var(--primary); font-weight: 700; margin-bottom: 0.75rem; }
+    
+    .add-btn {
+      margin-top: auto; background: var(--bg); border: 1px solid var(--primary);
+      color: var(--primary); font-weight: 600; padding: 0.5rem;
+      border-radius: 8px; cursor: pointer; min-height: 44px; width: 100%;
+      transition: all 0.2s;
+    }
+    .add-btn:hover { background: var(--primary); color: #fff; }
+
+    /* Modal / Drawer */
+    .cart-drawer {
+      position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px;
+      height: 100%; background: #fff; box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+      z-index: 1000; transition: right 0.3s ease; display: flex; flex-direction: column;
+    }
+    .cart-drawer.open { right: 0; }
+    .cart-header { padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .cart-items { flex-grow: 1; overflow-y: auto; padding: 1rem; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .cart-footer { padding: 1rem; border-top: 1px solid var(--border); background: #fff; }
+    .checkout-btn {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      padding: 0.85rem; border-radius: 8px; font-weight: 700; cursor: pointer; min-height: 44px;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Announcement Bar -->
-  <div class="announcement-bar">
-    ✨ Wear your sparkle with love... Worldwide shipping available ✨
-  </div>
-
   <header>
     <div class="header-container">
-      <a href="#" class="brand-logo-wrap">
-        <div>
-          <div class="brand-title">CHIC JUNE</div>
-          <div class="brand-subtitle">CLOTHING & LUXURY JEWELRY BRAND ✨</div>
-        </div>
-      </a>
-
-      <!-- Search Wrapper with Autocomplete Dropdown -->
+      <a href="#" class="brand">Chic June</a>
       <div class="search-wrapper">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search earrings, necklaces, rings...">
-        <div id="searchDropdown" class="search-results-dropdown"></div>
+        <input type="text" id="searchInput" class="search-input" placeholder="Search products or categories...">
       </div>
-
-      <button class="bag-btn" id="cartToggle">
-        <span>Bag</span>
-        <span class="bag-count" id="cartCount">0</span>
+      <button class="cart-btn" id="cartToggle">
+        Cart <span class="cart-count" id="cartCount">0</span>
       </button>
     </div>
   </header>
 
   <main>
-    <div class="product-grid" id="productGrid">
-      <!-- Dynamic products injected via app.js -->
-    </div>
+    <div class="product-grid" id="productGrid"></div>
   </main>
 
   <!-- Cart Side Drawer -->
   <div class="cart-drawer" id="cartDrawer">
     <div class="cart-header">
-      <h2>Your Royal Bag</h2>
-      <button id="closeCart" class="close-btn">&times;</button>
+      <h2>Your Shopping Bag</h2>
+      <button id="closeCart" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
     </div>
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-footer">
-      <div class="cart-total-row">
+      <div style="display:flex; justify-content:space-between; margin-bottom:1rem; font-weight:700;">
         <span>Total:</span>
         <span id="cartTotal">₦0</span>
       </div>
-      <button class="checkout-btn" id="checkoutBtn">Checkout with Paystack</button>
+      <button class="checkout-btn" id="checkoutBtn">Pay Now with Paystack</button>
     </div>
   </div>
 
-  <!-- Floating WhatsApp Widget -->
-  <div class="whatsapp-widget" title="Chat with Us">
-    💬
-  </div>
+  <script>
+    // 1. CONFIGURATION
+    const PAYSTACK_LIVE_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
+    const N8N_WEBHOOK_URL = 'https://YOUR_N8N_INSTANCE_URL/webhook/chic-june-order'; 
 
-  <script src="app.js"></script>
+    let products = [];
+    let cart = [];
+
+    // 2. HELPER: GOOGLE DRIVE IMAGE LINK FORMATTER
+    function formatDriveUrl(url) {
+      if (!url) return 'https://via.placeholder.com/300?text=No+Image';
+      const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return `https://lh3.googleusercontent.com/d/${match[1]}`;
+      }
+      return url;
+    }
+
+    // 3. FETCH PRODUCTS (FROM SHEET API OR WEBHOOK LAYER)
+    async function fetchProducts() {
+      // Direct sample / sheet payload format
+      products = [
+        { id: 1, name: "Chic June Tote Bag", price: 15000, category: "Bags", image: "https://drive.google.com/file/d/1ABC123XYZ/view" },
+        { id: 2, name: "Silk Hair Scarf", price: 5000, category: "Accessories", image: "" }
+      ];
+      renderProducts(products);
+    }
+
+    // 4. RENDER PRODUCT GRID
+    function renderProducts(items) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = items.map(item => `
+        <div class="product-card">
+          <div class="img-container">
+            <img src="${formatDriveUrl(item.image)}" alt="${item.name}" loading="lazy">
+          </div>
+          <div class="card-body">
+            <div class="product-name">${item.name}</div>
+            <div class="product-price">₦${item.price.toLocaleString()}</div>
+            <button class="add-btn" onclick="addToCart(${item.id})">Add to Cart</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 5. INSTANT SEARCH AUTOCOMPLETE
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+      );
+      renderProducts(filtered);
+    });
+
+    // 6. CART MANAGEMENT
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      const existing = cart.find(item => item.id === productId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      
+      document.getElementById('cartCount').innerText = totalQty;
+      document.getElementById('cartTotal').innerText = `₦${totalPrice.toLocaleString()}`;
+      
+      document.getElementById('cartItems').innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <div>
+            <strong>${item.name}</strong><br>
+            <small>₦${item.price.toLocaleString()} x ${item.qty}</small>
+          </div>
+          <strong>₦${(item.price * item.qty).toLocaleString()}</strong>
+        </div>
+      `).join('');
+    }
+
+    // CART DRAWER TOGGLE
+    const drawer = document.getElementById('cartDrawer');
+    document.getElementById('cartToggle').onclick = () => drawer.classList.add('open');
+    document.getElementById('closeCart').onclick = () => drawer.classList.remove('open');
+
+    // 7. PAYSTACK LIVE CHECKOUT INTEGRATION
+    document.getElementById('checkoutBtn').onclick = () => {
+      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      if (totalAmount === 0) return alert('Your cart is empty!');
+
+      const customerEmail = prompt("Please enter your email for order confirmation:");
+      if (!customerEmail) return;
+
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_LIVE_KEY,
+        email: customerEmail,
+        amount: totalAmount * 100, // Amount in kobo
+        currency: 'NGN',
+        ref: 'CJ_' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: function(response) {
+          // Send order metadata to n8n backend for Google Sheets & email verification
+          fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reference: response.reference,
+              email: customerEmail,
+              cart: cart,
+              total: totalAmount
+            })
+          });
+          alert('Payment Successful! Reference: ' + response.reference);
+          cart = [];
+          updateCartUI();
+          drawer.classList.remove('open');
+        },
+        onClose: function() {
+          alert('Transaction canceled.');
+        }
+      });
+      handler.openIframe();
+    };
+
+    fetchProducts();
+  </script>
 </body>
 </html>
