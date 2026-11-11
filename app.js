@@ -509,34 +509,44 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
         { display_name: "Merchant Note", variable_name: "merchant_note", value: note }
       ]
     },
-    callback: function(response) {
-      const payload = {
-        orderId,
-        paymentReference: response.reference,
-        timestamp: new Date().toISOString(),
-        customer: { ...customerInfo, address, shippingZone: selectedShippingOption.title, note },
-        items: cart,
-        subtotal,
-        shippingFee: currentShippingFee,
-        totalPrice: totalAmount,
-        status: 'PAID'
-      };
+    callback: async function(response) {
+  const payload = {
+    orderId,
+    paymentReference: response.reference,
+    timestamp: new Date().toISOString(),
+    customer: { ...customerInfo, address, shippingZone: selectedShippingOption.title, note },
+    items: cart,
+    subtotal,
+    shippingFee: currentShippingFee,
+    totalPrice: totalAmount,
+    status: 'PAID'
+  };
 
-      if (N8N_ORDER_WEBHOOK_URL) {
-        fetch(N8N_ORDER_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        }).catch(err => console.error('n8n post error:', err));
-      }
+  if (N8N_ORDER_WEBHOOK_URL) {
+    try {
+      const res = await fetch(N8N_ORDER_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'ngrok-skip-browser-warning': 'true'
+        },
+        body: JSON.stringify(payload)
+      });
+      console.log('n8n webhook response:', res.status);
+    } catch (err) {
+      console.error('n8n post error:', err);
+    }
+  } else {
+    console.warn('N8N_ORDER_WEBHOOK_URL is not defined!');
+  }
 
-      alert(`🎉 Payment Successful!\n\nReference: ${response.reference}\nThank you, ${customerInfo.firstName}! Valerie will prepare your order.`);
-      cart = [];
-      updateCartBadge();
-      switchTab('home');
-      document.getElementById('checkoutForm').reset();
-    },
-    onClose: function() { alert('Payment window closed.'); }
+  alert(`🎉 Payment Successful!\n\nReference: ${response.reference}\nThank you, ${customerInfo.firstName}! Valerie will prepare your order.`);
+  cart = [];
+  updateCartBadge();
+  switchTab('home');
+  document.getElementById('checkoutForm').reset();
+},
+onClose: function() { alert('Payment window closed.'); }
   });
 
   handler.openIframe();
