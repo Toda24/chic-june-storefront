@@ -5,7 +5,11 @@
 const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
 const N8N_PRODUCTS_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-products';
 const N8N_AUTH_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-auth-otp';
-const PAYSTACK_PUBLIC_KEY = 'pk_test_1234567890abcdef1234567890abcdef12345678';
+
+// ==========================================
+// VALERIE'S LIVE PAYSTACK PUBLIC KEY
+// ==========================================
+const PAYSTACK_PUBLIC_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
 const OFFICIAL_WHATSAPP_NUMBER = '2348167721448';
 
 let currentCategory = 'All';
@@ -44,6 +48,16 @@ let cart = [];
 let activeQvProduct = null;
 let activeQvQty = 1;
 
+// Google Drive Image Normalizer Helper
+function formatDriveUrl(url) {
+  if (!url) return '';
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+  }
+  return url;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLiveProducts();
   initSlideshow();
@@ -56,7 +70,13 @@ async function fetchLiveProducts() {
   try {
     const response = await fetch(N8N_PRODUCTS_URL);
     const data = await response.json();
-    if (Array.isArray(data) && data.length > 0) { products = data; }
+    if (Array.isArray(data) && data.length > 0) { 
+      products = data.map(item => ({
+        ...item,
+        img: formatDriveUrl(item.img || item.image || item.mediaUrl),
+        reviews: item.reviews || []
+      })); 
+    }
   } catch (err) {
     console.warn('Using local fallback catalog:', err);
   } finally {
@@ -178,12 +198,13 @@ function renderGrids() {
 
   fullGrid.innerHTML = filtered.map(p => {
     const ratingInfo = calculateRating(p);
+    const mediaSrc = formatDriveUrl(p.img || p.mediaUrl);
     return `
       <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
         <div class="card-media">
           ${p.mediaType === 'video' 
-            ? `<video src="${p.img || p.mediaUrl}" autoplay muted loop playsinline></video>` 
-            : `<img src="${p.img || p.mediaUrl}" alt="${p.name}" />`}
+            ? `<video src="${mediaSrc}" autoplay muted loop playsinline></video>` 
+            : `<img src="${mediaSrc}" alt="${p.name}" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
         <div class="card-body">
@@ -299,9 +320,10 @@ function openProductModal(id) {
   document.getElementById('qvReviewCount').innerText = product.reviews ? `(${product.reviews.length} reviews)` : '(0 reviews)';
 
   const mediaBox = document.getElementById('qvMedia');
+  const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${product.img || product.mediaUrl}" autoplay muted loop playsinline></video>`
-    : `<img src="${product.img || product.mediaUrl}" alt="${product.name}" />`;
+    ? `<video src="${mediaSrc}" autoplay muted loop playsinline></video>`
+    : `<img src="${mediaSrc}" alt="${product.name}" />`;
 
   selectStarRating(5);
   document.getElementById('productModal').style.display = 'flex';
@@ -377,11 +399,12 @@ function openCartModal() {
   } else {
     listContainer.innerHTML = cart.map(item => {
       const itemTotal = item.price * item.qty;
+      const mediaSrc = formatDriveUrl(item.img || item.mediaUrl);
       return `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
             <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden;">
-              <img src="${item.img || item.mediaUrl}" style="width:100%; height:100%; object-fit:cover;">
+              <img src="${mediaSrc}" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div>
               <div style="font-weight:600; font-size:0.85rem;">${item.name}</div>
