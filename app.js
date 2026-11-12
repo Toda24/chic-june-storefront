@@ -9,7 +9,7 @@ const N8N_AUTH_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook
 // ==========================================
 // VALERIE'S LIVE PAYSTACK PUBLIC KEY
 // ==========================================
-const PAYSTACK_PUBLIC_KEY = 'pk_test_61aad50049dd811c85259a6012f33c57e4009193';
+const PAYSTACK_PUBLIC_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
 const OFFICIAL_WHATSAPP_NUMBER = '2348167721448';
 
 let currentCategory = 'All';
@@ -48,12 +48,19 @@ let cart = [];
 let activeQvProduct = null;
 let activeQvQty = 1;
 
-// Google Drive Image Normalizer Helper
-function formatDriveUrl(url) {
+// Google Drive Media Normalizer with CORS Bypass for Videos
+function formatDriveUrl(url, mediaType = 'image') {
   if (!url) return '';
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    const fileId = match[1];
+    // If it's a video, wrap direct download in CORS proxy
+    if (mediaType === 'video' || url.toLowerCase().includes('.mp4')) {
+      const directVideoUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      return `https://corsproxy.io/?${encodeURIComponent(directVideoUrl)}`;
+    }
+    // Otherwise return image stream helper
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
   }
   return url;
 }
@@ -76,7 +83,7 @@ async function fetchLiveProducts() {
       products = data.map(item => ({
         ...item,
         category: item.category ? item.category.trim() : 'All',
-        img: formatDriveUrl(item.img || item.image || item.mediaUrl),
+        img: formatDriveUrl(item.img || item.image || item.mediaUrl, item.mediaType),
         reviews: item.reviews || []
       })); 
     }
@@ -237,7 +244,7 @@ function renderGrids() {
 
   fullGrid.innerHTML = filtered.map(p => {
     const ratingInfo = calculateRating(p);
-    const mediaSrc = formatDriveUrl(p.img || p.mediaUrl);
+    const mediaSrc = formatDriveUrl(p.img || p.mediaUrl, p.mediaType);
     return `
       <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
         <div class="card-media">
@@ -359,7 +366,7 @@ function openProductModal(id) {
   document.getElementById('qvReviewCount').innerText = product.reviews ? `(${product.reviews.length} reviews)` : '(0 reviews)';
 
   const mediaBox = document.getElementById('qvMedia');
-  const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
+  const mediaSrc = formatDriveUrl(product.img || product.mediaUrl, product.mediaType);
   mediaBox.innerHTML = product.mediaType === 'video'
     ? `<video src="${mediaSrc}" autoplay muted loop playsinline></video>`
     : `<img src="${mediaSrc}" alt="${product.name}" />`;
@@ -438,7 +445,7 @@ function openCartModal() {
   } else {
     listContainer.innerHTML = cart.map(item => {
       const itemTotal = item.price * item.qty;
-      const mediaSrc = formatDriveUrl(item.img || item.mediaUrl);
+      const mediaSrc = formatDriveUrl(item.img || item.mediaUrl, item.mediaType);
       return `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
