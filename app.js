@@ -48,7 +48,7 @@ let cart = [];
 let activeQvProduct = null;
 let activeQvQty = 1;
 
-// Media Normalizer: Leaves Cloudinary/direct videos untouched, converts Drive images/GIFs
+// Media Normalizer: Automatically structures Google Drive links into preview iframe links to bypass CORS
 function formatDriveUrl(url) {
   if (!url) return '';
   if (!url.includes('drive.google.com')) {
@@ -56,7 +56,7 @@ function formatDriveUrl(url) {
   }
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    return `https://drive.google.com/file/d/${match[1]}/preview`;
   }
   return url;
 }
@@ -245,7 +245,7 @@ function renderGrids() {
       <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
         <div class="card-media">
           ${p.mediaType === 'video' 
-            ? `<video src="${mediaSrc}" autoplay muted loop playsinline></video>` 
+            ? `<iframe src="${mediaSrc}" style="width:100%; height:100%; border:none; pointer-events:none;" allow="autoplay" loading="lazy"></iframe>` 
             : `<img src="${mediaSrc}" alt="${p.name}" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
@@ -364,7 +364,7 @@ function openProductModal(id) {
   const mediaBox = document.getElementById('qvMedia');
   const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${mediaSrc}" autoplay muted loop playsinline></video>`
+    ? `<iframe src="${mediaSrc}" style="width:100%; height:100%; border:none;" allow="autoplay"></iframe>`
     : `<img src="${mediaSrc}" alt="${product.name}" />`;
 
   selectStarRating(5);
