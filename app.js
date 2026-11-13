@@ -123,7 +123,6 @@ function initDynamicSlideshow() {
   const container = document.querySelector('.hero-slideshow-container .slideshow');
   if (!container) return;
 
-  // Sort products by dateAdded descending (newest first), take top 4 items for background rotation
   const sortedProducts = [...products].sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0));
   const slideItems = sortedProducts.slice(0, 4);
 
@@ -131,7 +130,6 @@ function initDynamicSlideshow() {
 
   container.innerHTML = slideItems.map((item, idx) => {
     const mediaSrc = formatDriveUrl(item.img || item.mediaUrl);
-    // If it's a video item, we can display it or fallback to its image source in background
     const bgUrl = item.mediaType === 'video' ? 'images/pic4.jpeg' : mediaSrc;
     return `<div class="slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${bgUrl}');"></div>`;
   }).join('');
@@ -211,13 +209,13 @@ function resetAndTriggerCatalogMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 60);
+          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 40);
           observerInstance.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    }, { threshold: 0.01, rootMargin: '0px 0px -10px 0px' });
     reveals.forEach(el => observer.observe(el));
-  }, 50);
+  }, 20);
 }
 
 function resetAndTriggerCareMotion() {
@@ -230,15 +228,16 @@ function resetAndTriggerCareMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, index * 100);
+          setTimeout(() => { entry.target.classList.add('active'); }, index * 80);
           observerInstance.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.05 });
     reveals.forEach(el => observer.observe(el));
-  }, 50);
+  }, 20);
 }
 
+// SIMULTANEOUS EAGER RENDERING FOR INSTANT MEDIA DISPLAY
 function renderGrids() {
   const fullGrid = document.getElementById('fullProductGrid');
   if (!fullGrid) return;
@@ -259,7 +258,6 @@ function renderGrids() {
     return;
   }
 
-  // Universal cross-device video attributes (playsinline, webkit-playsinline for mobile iOS/Android)
   fullGrid.innerHTML = filtered.map(p => {
     const ratingInfo = calculateRating(p);
     const mediaSrc = formatDriveUrl(p.img || p.mediaUrl);
@@ -268,7 +266,7 @@ function renderGrids() {
         <div class="card-media">
           ${p.mediaType === 'video' 
             ? `<video src="${mediaSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>` 
-            : `<img src="${mediaSrc}" alt="${p.name}" loading="lazy" />`}
+            : `<img src="${mediaSrc}" alt="${p.name}" loading="eager" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
         <div class="card-body">
@@ -468,7 +466,7 @@ function openCartModal() {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
             <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden; flex-shrink:0;">
-              <img src="${mediaSrc}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
+              <img src="${mediaSrc}" loading="eager" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div>
               <div style="font-weight:600; font-size:0.85rem;">${item.name}</div>
