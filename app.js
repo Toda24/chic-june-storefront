@@ -1,14 +1,11 @@
 /**
- * CHIC JUNE - Complete Refurbished E-Commerce Engine (Cross-Device Synchronized)
+ * CHIC JUNE - Complete Refurbished E-Commerce Engine (RAM-Cached Instant Media)
  */
 
 const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
 const N8N_PRODUCTS_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-products';
 const N8N_AUTH_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-auth-otp';
 
-// ==========================================
-// VALERIE'S LIVE PAYSTACK PUBLIC KEY
-// ==========================================
 const PAYSTACK_PUBLIC_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
 const OFFICIAL_WHATSAPP_NUMBER = '2348167721448';
 
@@ -18,6 +15,9 @@ let selectedReviewStar = 5;
 let pendingSignupUser = null;
 let selectedShippingOption = null;
 let currentShippingFee = 0;
+
+// RAM Cache for videos so they download ONCE and play instantly across all tabs
+const videoBlobCache = {};
 
 const shippingRates = [
   { id: 'm5', title: 'MAINLAND 5', price: 3000, desc: 'AMUWO ODOFIN, OSHODI, FESTAC, OKOTA, AGO PALACE WAY' },
@@ -35,7 +35,6 @@ const shippingRates = [
   { id: 'gig_north', title: 'GIG NORTH', price: 8500, desc: 'JOS, KANO, MAKURDI, KADUNA, ADAMAWA, GOMBE, JIGAWA, ZAMFARA, ETC.' }
 ];
 
-// Guaranteed baseline catalog so mobile never renders a blank screen if webhook is slow
 let products = [
   { id: 1, name: 'Milan Shijia Gold Sculpted Drop Earrings', category: 'Earrings', price: 4000, tag: 'NEW COLLECTION', mediaType: 'image', img: 'images/pic3.jpeg', desc: 'S925 Post luxury gold sculpted fluid drop earrings featuring polished curves.', reviews: [], dateAdded: '2026-01-01' },
   { id: 2, name: 'Uglyver Gold Ruffled Petal Earrings', category: 'Earrings', price: 4000, tag: 'BESTSELLER', mediaType: 'image', img: 'images/pic4.jpeg', desc: 'Exquisite gold-plated ruffled petal hoop earrings with secure backing.', reviews: [], dateAdded: '2026-01-02' },
@@ -47,12 +46,9 @@ let cart = [];
 let activeQvProduct = null;
 let activeQvQty = 1;
 
-// Media Normalizer: Routes Google Drive links through your n8n media proxy webhook
 function formatDriveUrl(url) {
   if (!url) return '';
-  if (!url.includes('drive.google.com')) {
-    return url;
-  }
+  if (!url.includes('drive.google.com')) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
     return `https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-media?id=${match[1]}`;
@@ -60,12 +56,34 @@ function formatDriveUrl(url) {
   return url;
 }
 
+// Downloads a video ONCE into RAM as a local blob URL and swaps it into all matching <video> elements
+async function preloadAndCacheVideo(rawUrl) {
+  if (!rawUrl || videoBlobCache[rawUrl]) return videoBlobCache[rawUrl] || rawUrl;
+  try {
+    const res = await fetch(rawUrl, {
+      headers: { 'ngrok-skip-browser-warning': 'true' }
+    });
+    if (!res.ok) return rawUrl;
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    videoBlobCache[rawUrl] = blobUrl;
+
+    // Immediately update any video tags currently on screen using this URL
+    document.querySelectorAll(`video[data-raw-src="${rawUrl}"]`).forEach(vid => {
+      if (vid.src !== blobUrl) {
+        vid.src = blobUrl;
+        vid.play().catch(() => {});
+      }
+    });
+    return blobUrl;
+  } catch (e) {
+    return rawUrl;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  // Render baseline immediately so mobile users see products instantly without waiting
-  renderGrids();
+  buildCatalogDOM();
   initDynamicSlideshow();
-  
-  // Fetch live sheet data asynchronously with mobile-safe headers
   await fetchLiveProducts();
   loadSavedCustomerAccount();
   renderShippingOptions(shippingRates);
@@ -77,28 +95,26 @@ async function fetchLiveProducts() {
     const response = await fetch(N8N_PRODUCTS_URL, {
       method: 'GET',
       mode: 'cors',
-      headers: { 
+      headers: {
         'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true' 
+        'ngrok-skip-browser-warning': 'true'
       }
     });
-    
     if (!response.ok) throw new Error('Network response failed');
-    
     const data = await response.json();
-    if (Array.isArray(data) && data.length > 0) { 
+    if (Array.isArray(data) && data.length > 0) {
       products = data.map(item => ({
         ...item,
         category: item.category ? item.category.trim() : 'All',
         img: formatDriveUrl(item.img || item.image || item.mediaUrl),
         reviews: item.reviews || [],
         dateAdded: item.dateAdded || item.timestamp || '2026-01-01'
-      })); 
-      renderGrids();
+      }));
+      buildCatalogDOM();
       initDynamicSlideshow();
     }
   } catch (err) {
-    console.warn('Mobile webhook fetch fallback active:', err);
+    console.warn('Using local fallback catalog:', err);
   }
 }
 
@@ -109,15 +125,19 @@ function switchTab(tabName) {
   const targetPage = document.getElementById(`page-${tabName}`);
   if (targetPage) targetPage.classList.add('active');
 
-  const activeBtn = Array.from(document.querySelectorAll('.nav-tab')).find(btn => 
-    btn.getAttribute('onclick').includes(tabName)
-  );
-  if (activeBtn) activeBtn.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    const fn = btn.getAttribute('onclick') || '';
+    if (fn.includes(`'${tabName}'`)) btn.classList.add('active');
+  });
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   if (tabName === 'care') resetAndTriggerCareMotion();
-  if (tabName === 'catalog') resetAndTriggerCatalogMotion();
+  if (tabName === 'catalog') {
+    applyCatalogFilters();
+    // Ensure cached videos keep playing when entering catalog
+    document.querySelectorAll('#fullProductGrid video').forEach(v => v.play().catch(() => {}));
+  }
   if (tabName === 'checkout') renderCheckoutSummary();
 }
 
@@ -127,13 +147,15 @@ function exploreCatalogFromAbout() {
   switchTab('catalog');
 }
 
-// DYNAMIC HOME BACKGROUND SLIDESHOW (Auto-sorted by dateAdded)
+// DYNAMIC HOME BACKGROUND SLIDESHOW (Older items rotate in as newer items are added by dateAdded)
 function initDynamicSlideshow() {
   const container = document.querySelector('.hero-slideshow-container .slideshow');
   if (!container) return;
 
-  const sortedProducts = [...products].sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0));
-  const slideItems = sortedProducts.slice(0, 4);
+  // Sort oldest to newest so earlier drops rotate in the background showcase
+  const sortedByDate = [...products].sort((a, b) => new Date(a.dateAdded || 0) - new Date(b.dateAdded || 0));
+  const imageItems = sortedByDate.filter(p => p.mediaType !== 'video');
+  const slideItems = (imageItems.length > 0 ? imageItems : sortedByDate).slice(0, 5);
 
   if (slideItems.length === 0) return;
 
@@ -147,17 +169,17 @@ function initDynamicSlideshow() {
   if (slides.length <= 1) return;
 
   let current = 0;
-  setInterval(() => {
+  if (window._heroSlideInterval) clearInterval(window._heroSlideInterval);
+  window._heroSlideInterval = setInterval(() => {
     slides[current].classList.remove('active');
     current = (current + 1) % slides.length;
     slides[current].classList.add('active');
   }, 4500);
 }
 
-// REAL-TIME PREDICTIVE SEARCH AUTOCOMPLETE
 function handleSearch(query) {
   searchQuery = query.toLowerCase().trim();
-  renderGrids();
+  applyCatalogFilters();
 
   const dropdown = document.getElementById('searchAutocompleteDropdown');
   if (!dropdown) return;
@@ -167,15 +189,15 @@ function handleSearch(query) {
     return;
   }
 
-  const matches = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery) || 
+  const matches = products.filter(p =>
+    p.name.toLowerCase().includes(searchQuery) ||
     (p.category && p.category.toLowerCase().includes(searchQuery))
   );
 
   if (matches.length > 0) {
     dropdown.style.display = 'block';
     dropdown.innerHTML = matches.slice(0, 5).map(m => `
-      <div onclick="selectAutocompleteItem('${m.name}')" style="padding: 0.6rem 1rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; font-size: 0.8rem;">
+      <div onclick="selectAutocompleteItem('${m.name.replace(/'/g, "\\'")}')" style="padding: 0.6rem 1rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #1a1a1a; font-size: 0.8rem;">
         <strong>${m.name}</strong> <span style="color: var(--gold); float: right;">₦${Number(m.price).toLocaleString()}</span>
       </div>
     `).join('');
@@ -185,18 +207,20 @@ function handleSearch(query) {
 }
 
 function selectAutocompleteItem(name) {
-  document.getElementById('globalSearchInput').value = name;
+  const input = document.getElementById('globalSearchInput');
+  if (input) input.value = name;
   searchQuery = name.toLowerCase().trim();
   const dropdown = document.getElementById('searchAutocompleteDropdown');
   if (dropdown) dropdown.style.display = 'none';
-  renderGrids();
+  switchTab('catalog');
+  applyCatalogFilters();
 }
 
 function filterCategory(category, btnEl) {
   currentCategory = category;
   document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
   if (btnEl) btnEl.classList.add('active');
-  renderGrids();
+  applyCatalogFilters();
 }
 
 function calculateRating(product) {
@@ -206,25 +230,6 @@ function calculateRating(product) {
   const sum = product.reviews.reduce((acc, r) => acc + r.stars, 0);
   const avg = (sum / product.reviews.length).toFixed(1);
   return { average: avg, text: `⭐ ${avg} (${product.reviews.length} reviews)` };
-}
-
-function resetAndTriggerCatalogMotion() {
-  const reveals = document.querySelectorAll('#fullProductGrid .reveal-stagger');
-  reveals.forEach(el => el.classList.remove('active'));
-
-  setTimeout(() => {
-    const observer = new IntersectionObserver((entries, observerInstance) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const siblings = Array.from(entry.target.parentNode.children);
-          const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 30);
-          observerInstance.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.01, rootMargin: '0px 0px -10px 0px' });
-    reveals.forEach(el => observer.observe(el));
-  }, 10);
 }
 
 function resetAndTriggerCareMotion() {
@@ -237,45 +242,41 @@ function resetAndTriggerCareMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, index * 60);
+          setTimeout(() => { entry.target.classList.add('active'); }, index * 80);
           observerInstance.unobserve(entry.target);
         }
       });
     }, { threshold: 0.05 });
     reveals.forEach(el => observer.observe(el));
-  }, 10);
+  }, 20);
 }
 
-// SIMULTANEOUS EAGER RENDERING FOR INSTANT CROSS-DEVICE MEDIA DISPLAY
-function renderGrids() {
+// BUILDS ALL PRODUCT CARDS ONCE & CACHES VIDEOS IN RAM (NEVER RE-DOWNLOADS ON TAB CLICK)
+function buildCatalogDOM() {
   const fullGrid = document.getElementById('fullProductGrid');
   if (!fullGrid) return;
 
-  const filtered = products.filter(p => {
-    const pCat = p.category ? p.category.toLowerCase().trim() : '';
-    const targetCat = currentCategory.toLowerCase().trim();
-
-    const matchesCat = (targetCat === 'all') || 
-                       (targetCat === 'new collection' && (p.tag === 'NEW COLLECTION' || p.tag === 'NEW')) || 
-                       (pCat === targetCat);
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery) || (p.desc && p.desc.toLowerCase().includes(searchQuery));
-    return matchesCat && matchesSearch;
-  });
-
-  if (filtered.length === 0) {
-    fullGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#777; padding: 2rem 0;">No jewelry pieces matched your search.</p>';
-    return;
-  }
-
-  fullGrid.innerHTML = filtered.map(p => {
+  fullGrid.innerHTML = products.map(p => {
     const ratingInfo = calculateRating(p);
-    const mediaSrc = formatDriveUrl(p.img || p.mediaUrl);
+    const rawSrc = formatDriveUrl(p.img || p.mediaUrl);
+    const activeSrc = videoBlobCache[rawSrc] || rawSrc;
+
+    if (p.mediaType === 'video' && !videoBlobCache[rawSrc]) {
+      preloadAndCacheVideo(rawSrc);
+    }
+
     return `
-      <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
+      <div class="product-card reveal-stagger active"
+           data-id="${p.id}"
+           data-cat="${(p.category || '').toLowerCase().trim()}"
+           data-tag="${(p.tag || '').toUpperCase().trim()}"
+           data-name="${(p.name || '').toLowerCase()}"
+           data-desc="${(p.desc || '').toLowerCase()}"
+           onclick="openProductModal(${p.id})">
         <div class="card-media">
-          ${p.mediaType === 'video' 
-            ? `<video src="${mediaSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>` 
-            : `<img src="${mediaSrc}" alt="${p.name}" loading="eager" />`}
+          ${p.mediaType === 'video'
+            ? `<video src="${activeSrc}" data-raw-src="${rawSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>`
+            : `<img src="${rawSrc}" alt="${p.name}" loading="eager" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
         <div class="card-body">
@@ -290,7 +291,57 @@ function renderGrids() {
     `;
   }).join('');
 
-  resetAndTriggerCatalogMotion();
+  applyCatalogFilters();
+}
+
+// INSTANT SHOW/HIDE FILTERING (ZERO DOM DESTRUCTION = ZERO VIDEO RELOAD)
+function applyCatalogFilters() {
+  const fullGrid = document.getElementById('fullProductGrid');
+  if (!fullGrid) return;
+
+  const cards = fullGrid.querySelectorAll('.product-card');
+  const targetCat = currentCategory.toLowerCase().trim();
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const pCat = card.getAttribute('data-cat');
+    const pTag = card.getAttribute('data-tag');
+    const pName = card.getAttribute('data-name');
+    const pDesc = card.getAttribute('data-desc');
+
+    const matchesCat = (targetCat === 'all') ||
+                       (targetCat === 'new collection' && (pTag === 'NEW COLLECTION' || pTag === 'NEW')) ||
+                       (pCat === targetCat);
+    const matchesSearch = !searchQuery || pName.includes(searchQuery) || pDesc.includes(searchQuery);
+
+    if (matchesCat && matchesSearch) {
+      card.style.display = 'flex';
+      visibleCount++;
+      const vid = card.querySelector('video');
+      if (vid && vid.paused) vid.play().catch(() => {});
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  let emptyMsg = document.getElementById('catalogEmptyMsg');
+  if (visibleCount === 0) {
+    if (!emptyMsg) {
+      emptyMsg = document.createElement('p');
+      emptyMsg.id = 'catalogEmptyMsg';
+      emptyMsg.style.cssText = 'grid-column: 1/-1; text-align:center; color:#777; padding: 2rem 0;';
+      emptyMsg.innerText = 'No jewelry pieces matched your search.';
+      fullGrid.appendChild(emptyMsg);
+    }
+    emptyMsg.style.display = 'block';
+  } else if (emptyMsg) {
+    emptyMsg.style.display = 'none';
+  }
+}
+
+// Keep renderGrids alias for any external callers
+function renderGrids() {
+  buildCatalogDOM();
 }
 
 /* SHIPPING MODAL & SELECTION LOGIC */
@@ -322,7 +373,7 @@ function renderShippingOptions(list) {
 
 function filterShippingRates(query) {
   const q = query.toLowerCase().trim();
-  const filtered = shippingRates.filter(r => 
+  const filtered = shippingRates.filter(r =>
     r.title.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q)
   );
   renderShippingOptions(filtered);
@@ -391,10 +442,12 @@ function openProductModal(id) {
   document.getElementById('qvReviewCount').innerText = product.reviews ? `(${product.reviews.length} reviews)` : '(0 reviews)';
 
   const mediaBox = document.getElementById('qvMedia');
-  const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
+  const rawSrc = formatDriveUrl(product.img || product.mediaUrl);
+  const activeSrc = videoBlobCache[rawSrc] || rawSrc;
+
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${mediaSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>`
-    : `<img src="${mediaSrc}" alt="${product.name}" />`;
+    ? `<video src="${activeSrc}" data-raw-src="${rawSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>`
+    : `<img src="${rawSrc}" alt="${product.name}" />`;
 
   selectStarRating(5);
   document.getElementById('productModal').style.display = 'flex';
@@ -426,13 +479,13 @@ function submitProductReview() {
   alert('✨ Thank you! Your review has been published.');
   document.getElementById('reviewComment').value = '';
   openProductModal(activeQvProduct.id);
-  renderGrids();
+  buildCatalogDOM();
 }
 
 function addQvToBag() {
   if (!activeQvProduct) return;
   const existing = cart.find(item => item.id === activeQvProduct.id);
-  if (existing) { existing.qty += activeQvQty; } 
+  if (existing) { existing.qty += activeQvQty; }
   else { cart.push({ ...activeQvProduct, qty: activeQvQty }); }
   updateCartBadge();
   closeProductModal();
@@ -442,7 +495,7 @@ function addQvToBag() {
 function addToCart(id) {
   const product = products.find(p => p.id === id);
   const existing = cart.find(item => item.id === id);
-  if (existing) { existing.qty += 1; } 
+  if (existing) { existing.qty += 1; }
   else { cart.push({ ...product, qty: 1 }); }
   updateCartBadge();
   alert(`✨ ${product.name} added to your bag!`);
@@ -475,7 +528,9 @@ function openCartModal() {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
             <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden; flex-shrink:0;">
-              <img src="${mediaSrc}" loading="eager" style="width:100%; height:100%; object-fit:cover;">
+              ${item.mediaType === 'video'
+                ? `<video src="${videoBlobCache[mediaSrc] || mediaSrc}" muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`
+                : `<img src="${mediaSrc}" loading="eager" style="width:100%; height:100%; object-fit:cover;">`}
             </div>
             <div>
               <div style="font-weight:600; font-size:0.85rem;">${item.name}</div>
@@ -506,7 +561,6 @@ function proceedToCheckoutPage() {
   switchTab('checkout');
 }
 
-/* NEWSLETTER SUBMISSION HANDLER */
 function handleNewsletterSubmit(e) {
   e.preventDefault();
   const val = document.getElementById('newsletterInput').value.trim();
@@ -515,7 +569,6 @@ function handleNewsletterSubmit(e) {
   document.getElementById('newsletterForm').reset();
 }
 
-/* CHECKOUT SUBMISSION & ASYNC ORDER PROCESSOR */
 async function processSuccessfulOrder(response, orderId, customerInfo, address, subtotal, totalAmount) {
   const payload = {
     orderId,
@@ -533,7 +586,7 @@ async function processSuccessfulOrder(response, orderId, customerInfo, address, 
     try {
       await fetch(N8N_ORDER_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
@@ -591,7 +644,6 @@ document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   handler.openIframe();
 });
 
-/* AUTHENTICATION & ACCOUNT MODAL LOGIC */
 function handleAccountClick() {
   const saved = localStorage.getItem('cj_customer_account');
   if (saved) {
@@ -642,11 +694,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       body: JSON.stringify({ type: 'LOGIN', email, password })
     });
     const result = await response.json();
-    
+
     const namePart = email.split('@')[0];
     const firstName = result.firstName || (namePart.charAt(0).toUpperCase() + namePart.slice(1));
     const accountData = { firstName, lastName: result.lastName || 'User', email, phone: result.phone || '08012345678' };
-    
+
     localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
     loadSavedCustomerAccount();
     closeAuthModal();
@@ -685,7 +737,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     try {
       await fetch(N8N_AUTH_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
@@ -710,7 +762,7 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
     try {
       await fetch(N8N_AUTH_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'ngrok-skip-browser-warning': 'true'
         },
@@ -728,7 +780,7 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
 document.getElementById('otpForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const code = document.getElementById('otpInput').value;
-  
+
   if (N8N_AUTH_WEBHOOK_URL) {
     try {
       await fetch(N8N_AUTH_WEBHOOK_URL, {
@@ -762,7 +814,6 @@ function loadSavedCustomerAccount() {
   btn.innerText = `👤 ${data.firstName} (Logout)`;
 }
 
-/* WHATSAPP WIDGET LOGIC */
 function toggleWhatsAppPopup() {
   const popup = document.getElementById('waPopup');
   popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
