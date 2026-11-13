@@ -1,5 +1,5 @@
 /**
- * CHIC JUNE - Complete Refurbished E-Commerce Engine (RAM-Cached Instant Media)
+ * CHIC JUNE - Complete Refurbished E-Commerce Engine (RAM-Cached Instant Media & Strict Auth)
  */
 
 const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
@@ -56,7 +56,6 @@ function formatDriveUrl(url) {
   return url;
 }
 
-// Downloads a video ONCE into RAM as a local blob URL and swaps it into all matching <video> elements
 async function preloadAndCacheVideo(rawUrl) {
   if (!rawUrl || videoBlobCache[rawUrl]) return videoBlobCache[rawUrl] || rawUrl;
   try {
@@ -68,7 +67,6 @@ async function preloadAndCacheVideo(rawUrl) {
     const blobUrl = URL.createObjectURL(blob);
     videoBlobCache[rawUrl] = blobUrl;
 
-    // Immediately update any video tags currently on screen using this URL
     document.querySelectorAll(`video[data-raw-src="${rawUrl}"]`).forEach(vid => {
       if (vid.src !== blobUrl) {
         vid.src = blobUrl;
@@ -135,7 +133,6 @@ function switchTab(tabName) {
   if (tabName === 'care') resetAndTriggerCareMotion();
   if (tabName === 'catalog') {
     applyCatalogFilters();
-    // Ensure cached videos keep playing when entering catalog
     document.querySelectorAll('#fullProductGrid video').forEach(v => v.play().catch(() => {}));
   }
   if (tabName === 'checkout') renderCheckoutSummary();
@@ -147,12 +144,10 @@ function exploreCatalogFromAbout() {
   switchTab('catalog');
 }
 
-// DYNAMIC HOME BACKGROUND SLIDESHOW (Older items rotate in as newer items are added by dateAdded)
 function initDynamicSlideshow() {
   const container = document.querySelector('.hero-slideshow-container .slideshow');
   if (!container) return;
 
-  // Sort oldest to newest so earlier drops rotate in the background showcase
   const sortedByDate = [...products].sort((a, b) => new Date(a.dateAdded || 0) - new Date(b.dateAdded || 0));
   const imageItems = sortedByDate.filter(p => p.mediaType !== 'video');
   const slideItems = (imageItems.length > 0 ? imageItems : sortedByDate).slice(0, 5);
@@ -251,7 +246,6 @@ function resetAndTriggerCareMotion() {
   }, 20);
 }
 
-// BUILDS ALL PRODUCT CARDS ONCE & CACHES VIDEOS IN RAM (NEVER RE-DOWNLOADS ON TAB CLICK)
 function buildCatalogDOM() {
   const fullGrid = document.getElementById('fullProductGrid');
   if (!fullGrid) return;
@@ -294,7 +288,6 @@ function buildCatalogDOM() {
   applyCatalogFilters();
 }
 
-// INSTANT SHOW/HIDE FILTERING (ZERO DOM DESTRUCTION = ZERO VIDEO RELOAD)
 function applyCatalogFilters() {
   const fullGrid = document.getElementById('fullProductGrid');
   if (!fullGrid) return;
@@ -339,12 +332,10 @@ function applyCatalogFilters() {
   }
 }
 
-// Keep renderGrids alias for any external callers
 function renderGrids() {
   buildCatalogDOM();
 }
 
-/* SHIPPING MODAL & SELECTION LOGIC */
 function openShippingModal() {
   document.getElementById('shippingModal').style.display = 'flex';
 }
@@ -682,36 +673,44 @@ function switchAuthMode(mode) {
   }
 }
 
+// STRICT REAL AUTH HANDLERS
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const password = document.getElementById('loginPassword').value;
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Signing in...';
 
   try {
     const response = await fetch(N8N_AUTH_WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-      body: JSON.stringify({ type: 'LOGIN', email, password })
+      body: JSON.stringify({ action: 'LOGIN', email, password })
     });
     const result = await response.json();
 
-    const namePart = email.split('@')[0];
-    const firstName = result.firstName || (namePart.charAt(0).toUpperCase() + namePart.slice(1));
-    const accountData = { firstName, lastName: result.lastName || 'User', email, phone: result.phone || '08012345678' };
+    if (!response.ok || !result.success) {
+      alert(result.message || '❌ Invalid email or password. Please try again.');
+      return;
+    }
+
+    const accountData = {
+      firstName: result.user.firstName,
+      lastName: result.user.lastName,
+      email: result.user.email,
+      phone: result.user.phone
+    };
 
     localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
     loadSavedCustomerAccount();
     closeAuthModal();
-    alert(`✨ Welcome back, ${firstName}!`);
+    alert(`✨ Welcome back, ${accountData.firstName}!`);
   } catch (err) {
-    console.warn('Backend login fallback:', err);
-    const namePart = email.split('@')[0];
-    const firstName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-    const accountData = { firstName, lastName: 'User', email, phone: '08012345678' };
-    localStorage.setItem('cj_customer_account', JSON.stringify(accountData));
-    loadSavedCustomerAccount();
-    closeAuthModal();
-    alert(`✨ Welcome back, ${firstName}!`);
+    alert('⚠️ Unable to reach authentication server. Please ensure your backend is running.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Login';
   }
 });
 
@@ -726,80 +725,120 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   }
 
   pendingSignupUser = {
-    firstName: document.getElementById('signupFirstName').value,
-    lastName: document.getElementById('signupLastName').value,
-    email: document.getElementById('signupEmail').value,
-    phone: document.getElementById('signupPhone').value,
+    firstName: document.getElementById('signupFirstName').value.trim(),
+    lastName: document.getElementById('signupLastName').value.trim(),
+    email: document.getElementById('signupEmail').value.trim().toLowerCase(),
+    phone: document.getElementById('signupPhone').value.trim(),
     password: password
   };
 
-  if (N8N_AUTH_WEBHOOK_URL) {
-    try {
-      await fetch(N8N_AUTH_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify({ type: 'SIGNUP_OTP_REQUEST', user: pendingSignupUser })
-      });
-    } catch (err) {
-      console.error('n8n auth error:', err);
-    }
-  }
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Checking & Sending Code...';
 
-  document.getElementById('otpTargetEmail').innerText = pendingSignupUser.email;
-  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-  document.getElementById('otpForm').classList.add('active');
-  document.getElementById('authModalTitle').innerText = 'Email Verification';
+  try {
+    const response = await fetch(N8N_AUTH_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
+      body: JSON.stringify({ action: 'SIGNUP_REQUEST', user: pendingSignupUser })
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      alert(result.message || '❌ An account with this email already exists. Please log in instead.');
+      return;
+    }
+
+    document.getElementById('otpTargetEmail').innerText = pendingSignupUser.email;
+    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+    document.getElementById('otpForm').classList.add('active');
+    document.getElementById('authModalTitle').innerText = 'Email Verification';
+  } catch (err) {
+    alert('⚠️ Could not send verification email. Check your n8n connection.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Send Verification Code';
+  }
 });
 
 document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('forgotEmail').value;
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Sending...';
 
-  if (N8N_AUTH_WEBHOOK_URL) {
-    try {
-      await fetch(N8N_AUTH_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify({ type: 'PASSWORD_RESET_REQUEST', email })
-      });
-    } catch (err) {
-      console.error('n8n auth error:', err);
+  try {
+    const response = await fetch(N8N_AUTH_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
+      body: JSON.stringify({ action: 'PASSWORD_RESET', email })
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      alert(result.message || '❌ No account found with that email address.');
+      return;
     }
-  }
 
-  alert(`✨ Password reset instructions sent to ${email}. Please check your inbox.`);
-  switchAuthMode('login');
+    alert(`✨ ${result.message || 'Password recovery email sent! Check your inbox.'}`);
+    switchAuthMode('login');
+  } catch (err) {
+    alert('⚠️ Unable to reach server.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Send Reset Link';
+  }
 });
 
 document.getElementById('otpForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const code = document.getElementById('otpInput').value;
+  const code = document.getElementById('otpInput').value.trim();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.innerText = 'Verifying...';
 
-  if (N8N_AUTH_WEBHOOK_URL) {
-    try {
-      await fetch(N8N_AUTH_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
-        body: JSON.stringify({ type: 'VERIFY_OTP', email: pendingSignupUser.email, code })
-      });
-    } catch (err) {
-      console.warn('OTP Verification fallback:', err);
+  try {
+    const response = await fetch(N8N_AUTH_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+      body: JSON.stringify({
+        action: 'VERIFY_OTP',
+        email: pendingSignupUser.email,
+        code: code
+      })
+    });
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      alert(result.message || '❌ Incorrect or expired verification code. Check your email inbox and try again.');
+      return;
     }
-  }
 
-  if (code.length === 6) {
-    localStorage.setItem('cj_customer_account', JSON.stringify(pendingSignupUser));
+    const verifiedUser = {
+      firstName: pendingSignupUser.firstName,
+      lastName: pendingSignupUser.lastName,
+      email: pendingSignupUser.email,
+      phone: pendingSignupUser.phone
+    };
+
+    localStorage.setItem('cj_customer_account', JSON.stringify(verifiedUser));
     loadSavedCustomerAccount();
     closeAuthModal();
-    alert(`🎉 Account Verified! Welcome to Chic June, ${pendingSignupUser.firstName}!`);
-  } else {
-    alert('Please enter a valid 6-digit verification code.');
+    document.getElementById('otpForm').reset();
+    document.getElementById('signupForm').reset();
+    alert(`🎉 Email Verified! Welcome to Chic June, ${verifiedUser.firstName}!`);
+  } catch (err) {
+    alert('⚠️ Verification failed due to a server error.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'Verify Account & Sign In';
   }
 });
 
