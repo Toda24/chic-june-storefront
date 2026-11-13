@@ -1,5 +1,5 @@
 /**
- * CHIC JUNE - Complete Refurbished E-Commerce Engine
+ * CHIC JUNE - Complete Refurbished E-Commerce Engine (Cross-Device Synchronized)
  */
 
 const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
@@ -35,6 +35,7 @@ const shippingRates = [
   { id: 'gig_north', title: 'GIG NORTH', price: 8500, desc: 'JOS, KANO, MAKURDI, KADUNA, ADAMAWA, GOMBE, JIGAWA, ZAMFARA, ETC.' }
 ];
 
+// Guaranteed baseline catalog so mobile never renders a blank screen if webhook is slow
 let products = [
   { id: 1, name: 'Milan Shijia Gold Sculpted Drop Earrings', category: 'Earrings', price: 4000, tag: 'NEW COLLECTION', mediaType: 'image', img: 'images/pic3.jpeg', desc: 'S925 Post luxury gold sculpted fluid drop earrings featuring polished curves.', reviews: [], dateAdded: '2026-01-01' },
   { id: 2, name: 'Uglyver Gold Ruffled Petal Earrings', category: 'Earrings', price: 4000, tag: 'BESTSELLER', mediaType: 'image', img: 'images/pic4.jpeg', desc: 'Exquisite gold-plated ruffled petal hoop earrings with secure backing.', reviews: [], dateAdded: '2026-01-02' },
@@ -60,21 +61,30 @@ function formatDriveUrl(url) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Render baseline immediately so mobile users see products instantly without waiting
+  renderGrids();
+  initDynamicSlideshow();
+  
+  // Fetch live sheet data asynchronously with mobile-safe headers
   await fetchLiveProducts();
   loadSavedCustomerAccount();
   renderShippingOptions(shippingRates);
 });
 
 async function fetchLiveProducts() {
-  if (!N8N_PRODUCTS_URL) { 
-    renderGrids(); 
-    initDynamicSlideshow();
-    return; 
-  }
+  if (!N8N_PRODUCTS_URL) return;
   try {
     const response = await fetch(N8N_PRODUCTS_URL, {
-      headers: { 'ngrok-skip-browser-warning': 'true' }
+      method: 'GET',
+      mode: 'cors',
+      headers: { 
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true' 
+      }
     });
+    
+    if (!response.ok) throw new Error('Network response failed');
+    
     const data = await response.json();
     if (Array.isArray(data) && data.length > 0) { 
       products = data.map(item => ({
@@ -84,12 +94,11 @@ async function fetchLiveProducts() {
         reviews: item.reviews || [],
         dateAdded: item.dateAdded || item.timestamp || '2026-01-01'
       })); 
+      renderGrids();
+      initDynamicSlideshow();
     }
   } catch (err) {
-    console.warn('Using local fallback catalog:', err);
-  } finally {
-    renderGrids();
-    initDynamicSlideshow();
+    console.warn('Mobile webhook fetch fallback active:', err);
   }
 }
 
@@ -209,13 +218,13 @@ function resetAndTriggerCatalogMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 40);
+          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 30);
           observerInstance.unobserve(entry.target);
         }
       });
     }, { threshold: 0.01, rootMargin: '0px 0px -10px 0px' });
     reveals.forEach(el => observer.observe(el));
-  }, 20);
+  }, 10);
 }
 
 function resetAndTriggerCareMotion() {
@@ -228,16 +237,16 @@ function resetAndTriggerCareMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, index * 80);
+          setTimeout(() => { entry.target.classList.add('active'); }, index * 60);
           observerInstance.unobserve(entry.target);
         }
       });
     }, { threshold: 0.05 });
     reveals.forEach(el => observer.observe(el));
-  }, 20);
+  }, 10);
 }
 
-// SIMULTANEOUS EAGER RENDERING FOR INSTANT MEDIA DISPLAY
+// SIMULTANEOUS EAGER RENDERING FOR INSTANT CROSS-DEVICE MEDIA DISPLAY
 function renderGrids() {
   const fullGrid = document.getElementById('fullProductGrid');
   if (!fullGrid) return;
