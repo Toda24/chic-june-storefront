@@ -245,8 +245,8 @@ function renderGrids() {
       <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
         <div class="card-media">
           ${p.mediaType === 'video' 
-            ? `<video src="${mediaSrc}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>` 
-            : `<img src="${mediaSrc}" alt="${p.name}" />`}
+            ? `<video src="${mediaSrc}" autoplay muted loop playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>` 
+            : `<img src="${mediaSrc}" alt="${p.name}" loading="lazy" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
         <div class="card-body">
@@ -364,8 +364,8 @@ function openProductModal(id) {
   const mediaBox = document.getElementById('qvMedia');
   const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${mediaSrc}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`
-    : `<img src="${mediaSrc}" alt="${product.name}" />`;
+    ? `<video src="${mediaSrc}" autoplay muted loop playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`
+    : `<img src="${mediaSrc}" alt="${product.name}" loading="lazy" />`;
 
   selectStarRating(5);
   document.getElementById('productModal').style.display = 'flex';
@@ -446,7 +446,7 @@ function openCartModal() {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.8rem; border-bottom:1px solid var(--border);">
           <div style="display:flex; gap:0.8rem; align-items:center;">
             <div style="width:50px; height:50px; background:#F3EFEA; border-radius:8px; overflow:hidden; flex-shrink:0;">
-              <img src="${mediaSrc}" style="width:100%; height:100%; object-fit:cover;">
+              <img src="${mediaSrc}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div>
               <div style="font-weight:600; font-size:0.85rem;">${item.name}</div>
