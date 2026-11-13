@@ -36,12 +36,10 @@ const shippingRates = [
 ];
 
 let products = [
-  { id: 1, name: 'Milan Shijia Gold Sculpted Drop Earrings', category: 'Earrings', price: 4000, tag: 'NEW COLLECTION', mediaType: 'image', img: 'images/pic3.jpeg', desc: 'S925 Post luxury gold sculpted fluid drop earrings featuring polished curves.', reviews: [] },
-  { id: 2, name: 'Uglyver Gold Ruffled Petal Earrings', category: 'Earrings', price: 4000, tag: 'BESTSELLER', mediaType: 'image', img: 'images/pic4.jpeg', desc: 'Exquisite gold-plated ruffled petal hoop earrings with secure backing.', reviews: [] },
-  { id: 3, name: 'Sculpted Golden Wave Bracelet Set', category: 'Bracelets', price: 4500, tag: 'TRENDING', mediaType: 'video', img: 'images/GIF1.mp4', desc: 'Signature gold statement bracelet set captured live in studio.', reviews: [] },
-  { id: 4, name: 'Royal Heritage Gold Chain & Pendant', category: 'Necklaces', price: 5000, tag: 'POPULAR', mediaType: 'video', img: 'images/GIF2.mp4', desc: 'Tarnish-resistant luxury gold chain designed for everyday elegance.', reviews: [] },
-  { id: 5, name: 'Chic Layered Gold Anklet & Bracelet', category: 'Bracelets', price: 4000, tag: 'NEW', mediaType: 'video', img: 'images/GIF3.mp4', desc: 'Delicate stacked gold accents for effortless charm.', reviews: [] },
-  { id: 6, name: 'Pave Cubic Zirconia Gold Band', category: 'Rings', price: 4000, tag: 'LIMITED', mediaType: 'video', img: 'images/GIF4.mp4', desc: 'Shimmering pavé set gold band ring.', reviews: [] }
+  { id: 1, name: 'Milan Shijia Gold Sculpted Drop Earrings', category: 'Earrings', price: 4000, tag: 'NEW COLLECTION', mediaType: 'image', img: 'images/pic3.jpeg', desc: 'S925 Post luxury gold sculpted fluid drop earrings featuring polished curves.', reviews: [], dateAdded: '2026-01-01' },
+  { id: 2, name: 'Uglyver Gold Ruffled Petal Earrings', category: 'Earrings', price: 4000, tag: 'BESTSELLER', mediaType: 'image', img: 'images/pic4.jpeg', desc: 'Exquisite gold-plated ruffled petal hoop earrings with secure backing.', reviews: [], dateAdded: '2026-01-02' },
+  { id: 3, name: 'Sculpted Golden Wave Bracelet Set', category: 'Bracelets', price: 4500, tag: 'TRENDING', mediaType: 'video', img: 'images/GIF1.mp4', desc: 'Signature gold statement bracelet set captured live in studio.', reviews: [], dateAdded: '2026-01-03' },
+  { id: 4, name: 'Royal Heritage Gold Chain & Pendant', category: 'Necklaces', price: 5000, tag: 'POPULAR', mediaType: 'video', img: 'images/GIF2.mp4', desc: 'Tarnish-resistant luxury gold chain designed for everyday elegance.', reviews: [], dateAdded: '2026-01-04' }
 ];
 
 let cart = [];
@@ -63,13 +61,16 @@ function formatDriveUrl(url) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchLiveProducts();
-  initSlideshow();
   loadSavedCustomerAccount();
   renderShippingOptions(shippingRates);
 });
 
 async function fetchLiveProducts() {
-  if (!N8N_PRODUCTS_URL) { renderGrids(); return; }
+  if (!N8N_PRODUCTS_URL) { 
+    renderGrids(); 
+    initDynamicSlideshow();
+    return; 
+  }
   try {
     const response = await fetch(N8N_PRODUCTS_URL, {
       headers: { 'ngrok-skip-browser-warning': 'true' }
@@ -80,13 +81,15 @@ async function fetchLiveProducts() {
         ...item,
         category: item.category ? item.category.trim() : 'All',
         img: formatDriveUrl(item.img || item.image || item.mediaUrl),
-        reviews: item.reviews || []
+        reviews: item.reviews || [],
+        dateAdded: item.dateAdded || item.timestamp || '2026-01-01'
       })); 
     }
   } catch (err) {
     console.warn('Using local fallback catalog:', err);
   } finally {
     renderGrids();
+    initDynamicSlideshow();
   }
 }
 
@@ -113,6 +116,35 @@ function exploreCatalogFromAbout() {
   const allTabBtn = document.querySelector('.cat-tab');
   filterCategory('All', allTabBtn);
   switchTab('catalog');
+}
+
+// DYNAMIC HOME BACKGROUND SLIDESHOW (Auto-sorted by dateAdded)
+function initDynamicSlideshow() {
+  const container = document.querySelector('.hero-slideshow-container .slideshow');
+  if (!container) return;
+
+  // Sort products by dateAdded descending (newest first), take top 4 items for background rotation
+  const sortedProducts = [...products].sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0));
+  const slideItems = sortedProducts.slice(0, 4);
+
+  if (slideItems.length === 0) return;
+
+  container.innerHTML = slideItems.map((item, idx) => {
+    const mediaSrc = formatDriveUrl(item.img || item.mediaUrl);
+    // If it's a video item, we can display it or fallback to its image source in background
+    const bgUrl = item.mediaType === 'video' ? 'images/pic4.jpeg' : mediaSrc;
+    return `<div class="slide ${idx === 0 ? 'active' : ''}" style="background-image: url('${bgUrl}');"></div>`;
+  }).join('');
+
+  const slides = container.querySelectorAll('.slide');
+  if (slides.length <= 1) return;
+
+  let current = 0;
+  setInterval(() => {
+    slides[current].classList.remove('active');
+    current = (current + 1) % slides.length;
+    slides[current].classList.add('active');
+  }, 4500);
 }
 
 // REAL-TIME PREDICTIVE SEARCH AUTOCOMPLETE
@@ -179,13 +211,13 @@ function resetAndTriggerCatalogMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 90);
+          setTimeout(() => { entry.target.classList.add('active'); }, (index % 4) * 60);
           observerInstance.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
     reveals.forEach(el => observer.observe(el));
-  }, 100);
+  }, 50);
 }
 
 function resetAndTriggerCareMotion() {
@@ -198,24 +230,13 @@ function resetAndTriggerCareMotion() {
         if (entry.isIntersecting) {
           const siblings = Array.from(entry.target.parentNode.children);
           const index = siblings.indexOf(entry.target);
-          setTimeout(() => { entry.target.classList.add('active'); }, index * 140);
+          setTimeout(() => { entry.target.classList.add('active'); }, index * 100);
           observerInstance.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.1 });
     reveals.forEach(el => observer.observe(el));
-  }, 100);
-}
-
-function initSlideshow() {
-  const slides = document.querySelectorAll('.slideshow .slide');
-  let current = 0;
-  if (slides.length <= 1) return;
-  setInterval(() => {
-    slides[current].classList.remove('active');
-    current = (current + 1) % slides.length;
-    slides[current].classList.add('active');
-  }, 4500);
+  }, 50);
 }
 
 function renderGrids() {
@@ -238,6 +259,7 @@ function renderGrids() {
     return;
   }
 
+  // Universal cross-device video attributes (playsinline, webkit-playsinline for mobile iOS/Android)
   fullGrid.innerHTML = filtered.map(p => {
     const ratingInfo = calculateRating(p);
     const mediaSrc = formatDriveUrl(p.img || p.mediaUrl);
@@ -245,7 +267,7 @@ function renderGrids() {
       <div class="product-card reveal-stagger" onclick="openProductModal(${p.id})">
         <div class="card-media">
           ${p.mediaType === 'video' 
-            ? `<video src="${mediaSrc}" autoplay muted loop playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>` 
+            ? `<video src="${mediaSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>` 
             : `<img src="${mediaSrc}" alt="${p.name}" loading="lazy" />`}
           <span class="card-tag">${p.tag || 'NEW'}</span>
         </div>
@@ -364,8 +386,8 @@ function openProductModal(id) {
   const mediaBox = document.getElementById('qvMedia');
   const mediaSrc = formatDriveUrl(product.img || product.mediaUrl);
   mediaBox.innerHTML = product.mediaType === 'video'
-    ? `<video src="${mediaSrc}" autoplay muted loop playsinline preload="metadata" style="width:100%; height:100%; object-fit:cover;"></video>`
-    : `<img src="${mediaSrc}" alt="${product.name}" loading="lazy" />`;
+    ? `<video src="${mediaSrc}" autoplay muted loop playsinline webkit-playsinline preload="auto" style="width:100%; height:100%; object-fit:cover;"></video>`
+    : `<img src="${mediaSrc}" alt="${product.name}" />`;
 
   selectStarRating(5);
   document.getElementById('productModal').style.display = 'flex';
