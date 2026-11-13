@@ -48,7 +48,7 @@ let cart = [];
 let activeQvProduct = null;
 let activeQvQty = 1;
 
-// Media Normalizer: Converts Google Drive links into direct raw stream URLs for seamless autoplay
+// Media Normalizer: Routes Google Drive links through your n8n media proxy webhook
 function formatDriveUrl(url) {
   if (!url) return '';
   if (!url.includes('drive.google.com')) {
@@ -56,7 +56,7 @@ function formatDriveUrl(url) {
   }
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    return `https://docs.google.com/uc?export=download&id=${match[1]}`;
+    return `https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-media?id=${match[1]}`;
   }
   return url;
 }
