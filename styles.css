@@ -267,14 +267,23 @@ html, body {
 .wa-popup-footer input { flex: 1; padding: 0.5rem 0.8rem; border-radius: 20px; border: 1px solid #CCC; font-size: 0.8rem; outline: none; }
 .wa-popup-footer button { background: #075E54; color: white; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
 
-.footer { background: var(--burgundy-dark); color: white; padding: 1.6rem 1.5rem 1rem; margin-top: auto; border-top: 1px solid var(--gold); width: 100%; }
-.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); width: 100%; }
+/* INSTAGRAM FOLLOW BANNER */
+.footer-ig-banner { background: linear-gradient(135deg, rgba(214,36,159,0.15) 0%, rgba(253,89,73,0.15) 100%); border: 1.5px solid var(--gold); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; width: 100%; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+.ig-banner-content { display: flex; align-items: center; gap: 1rem; }
+.ig-banner-sparkle { font-size: 2rem; }
+.footer-ig-banner h4 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.1rem; margin: 0 0 0.3rem; }
+.footer-ig-banner p { font-size: 0.85rem; color: rgba(255,255,255,0.9); margin: 0; }
+.footer-ig-btn { background: linear-gradient(45deg, #fdf497, #fd5949, #d6249f, #285AEB); color: white; padding: 0.75rem 1.5rem; border-radius: 30px; font-weight: 700; text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; box-shadow: 0 4px 15px rgba(214,36,159,0.3); transition: transform 0.2s; }
+.footer-ig-btn:hover { transform: scale(1.05); }
+
+.footer { background: var(--burgundy-dark); color: white; padding: 2.5rem 1.5rem 1rem; margin-top: auto; border-top: 1px solid var(--gold); width: 100%; }
+.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); width: 100%; }
 .footer-brand h3 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0 0 0.2rem; font-size: 1.05rem; }
 .footer-brand p { margin: 0; font-size: 0.8rem; }
 .footer-newsletter { max-width: 380px; width: 100%; }
 .footer-newsletter h4 { font-family: 'Cinzel', serif; color: var(--gold); margin: 0 0 0.2rem; font-size: 0.88rem; }
 .footer-newsletter p { font-size: 0.76rem; color: rgba(255,255,255,0.8); margin: 0 0 0.5rem; }
-.footer-copy { text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.8rem; }
+.footer-copy { text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 1.2rem; }
 
 .form-group { margin-bottom: 0.8rem; width: 100%; }
 .form-group label { display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.2rem; }
@@ -331,6 +340,10 @@ html, body {
   .quickview-media { height: 220px; }
   .about-hero-card { padding: 2.5rem 1.2rem; }
   .care-card-luxury { padding: 2rem 1rem; }
+
+  .footer-ig-banner { flex-direction: column; align-items: stretch; text-align: center; gap: 1rem; padding: 1.2rem; }
+  .ig-banner-content { justify-content: center; }
+  .footer-ig-btn { justify-content: center; width: 100%; }
 
   .footer { padding: 1.2rem 1rem 0.9rem; }
   .footer-inner { flex-direction: column; align-items: stretch; gap: 0.9rem; padding-bottom: 0.8rem; }

@@ -411,7 +411,7 @@ function renderCheckoutSummary() {
     const acc = JSON.parse(saved);
     document.getElementById('displayAuthUser').innerText = `${acc.firstName} (${acc.email}, ${acc.phone})`;
   } else {
-    document.getElementById('displayAuthUser').innerText = 'Guest Customer (Login to auto-save orders)';
+    document.getElementById('displayAuthUser').innerText = 'Guest Customer (Login required)';
   }
 }
 
@@ -473,7 +473,18 @@ function submitProductReview() {
   buildCatalogDOM();
 }
 
+function checkAuthBeforeAction() {
+  const saved = localStorage.getItem('cj_customer_account');
+  if (!saved) {
+    alert('✨ Please sign in or create an account to shop our exclusive luxury collection!');
+    openAuthModal('login');
+    return false;
+  }
+  return true;
+}
+
 function addQvToBag() {
+  if (!checkAuthBeforeAction()) return;
   if (!activeQvProduct) return;
   const existing = cart.find(item => item.id === activeQvProduct.id);
   if (existing) { existing.qty += activeQvQty; }
@@ -484,6 +495,7 @@ function addQvToBag() {
 }
 
 function addToCart(id) {
+  if (!checkAuthBeforeAction()) return;
   const product = products.find(p => p.id === id);
   const existing = cart.find(item => item.id === id);
   if (existing) { existing.qty += 1; }
@@ -504,6 +516,7 @@ function clearCart() {
 }
 
 function openCartModal() {
+  if (!checkAuthBeforeAction()) return;
   const modal = document.getElementById('cartModal');
   const listContainer = document.getElementById('cartItemsList');
   const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -544,6 +557,7 @@ function closeCartModal() {
 }
 
 function proceedToCheckoutPage() {
+  if (!checkAuthBeforeAction()) return;
   if (cart.length === 0) {
     alert('Your shopping bag is empty! Please add at least one piece to your bag before proceeding.');
     return;
@@ -597,6 +611,7 @@ async function processSuccessfulOrder(response, orderId, customerInfo, address, 
 
 document.getElementById('checkoutForm').addEventListener('submit', (e) => {
   e.preventDefault();
+  if (!checkAuthBeforeAction()) return;
   if (cart.length === 0) { alert('Please add at least one item to your bag!'); return; }
   if (!selectedShippingOption) { alert('Please click "SELECT A SHIPPING PRICE" to choose your delivery location!'); return; }
 
@@ -643,6 +658,7 @@ function handleAccountClick() {
       localStorage.removeItem('cj_customer_account');
       loadSavedCustomerAccount();
       alert('You have been logged out successfully.');
+      openAuthModal('login');
     }
   } else {
     openAuthModal('login');
