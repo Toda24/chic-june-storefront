@@ -2,9 +2,9 @@
  * CHIC JUNE - Complete Refurbished E-Commerce Engine (RAM-Cached Instant Media & Strict Auth)
  */
 
-const N8N_ORDER_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-order';
-const N8N_PRODUCTS_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-products';
-const N8N_AUTH_WEBHOOK_URL = 'https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-auth-otp';
+const N8N_ORDER_WEBHOOK_URL = 'https://n8n-production-ff983c45.up.railway.app/webhook/chic-june-order';
+const N8N_PRODUCTS_URL = 'https://n8n-production-ff983c45.up.railway.app/webhook/chic-june-products';
+const N8N_AUTH_WEBHOOK_URL = 'https://n8n-production-ff983c45.up.railway.app/webhook/chic-june-auth-otp';
 
 const PAYSTACK_PUBLIC_KEY = 'pk_live_f0843f5e41a5cde7db5b1fb9d1d3373b4666fc8f';
 const OFFICIAL_WHATSAPP_NUMBER = '2348167721448';
@@ -51,7 +51,7 @@ function formatDriveUrl(url) {
   if (!url.includes('drive.google.com')) return url;
   const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
-    return `https://kaila-ungotten-wade.ngrok-free.dev/webhook/chic-june-media?id=${match[1]}`;
+    return `https://n8n-production-ff983c45.up.railway.app/webhook/chic-june-media?id=${match[1]}`;
   }
   return url;
 }
